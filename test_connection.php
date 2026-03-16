@@ -10,13 +10,21 @@ ini_set('display_errors', 1);
 
 echo "<h2>Disposal System: Database Connection Test</h2>";
 
-$connectionFile = __DIR__ . '/connection/database.php';
-if (!file_exists($connectionFile)) {
-    // Fallback for different environments
-    $connectionFile = 'connection/database.php';
-}
+echo "<h3>Debug Info:</h3>";
+echo "<ul>";
+echo "<li><strong>Current Dir (__DIR__):</strong> " . __DIR__ . "</li>";
+echo "<li><strong>Working Dir (getcwd):</strong> " . getcwd() . "</li>";
+echo "</ul>";
 
-if (!file_exists($connectionFile)) {
+echo "<h4>Directory Listing:</h4><pre>";
+$files = scandir(__DIR__);
+foreach($files as $file) {
+    $type = is_dir(__DIR__ . '/' . $file) ? '[DIR]' : '[FILE]';
+    echo "$type $file\n";
+}
+echo "</pre>";
+
+$connectionFile = __DIR__ . '/connection/database.php';
     echo "<p style='color: red;'>❌ Error: Connection file not found at: $connectionFile</p>";
     exit();
 }
