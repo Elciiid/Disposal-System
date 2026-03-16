@@ -26,8 +26,7 @@ $areas        = fetchAllFromTable($conn, 'wst_Areas', 'AreaName');
 $shifts       = fetchAllFromTable($conn, 'wst_Shifts');
 $descriptions = fetchAllFromTable($conn, 'wst_PDescriptions', 'DescriptionName');
 $phases       = fetchAllFromTable($conn, 'wst_Phases', 'PhaseName');
-?>
-<?php
+
 $pageTitle = 'Production Waste Log';
 $extraCSS = ['supervisor.css'];
 require_once __DIR__ . '/../components/header.php';
