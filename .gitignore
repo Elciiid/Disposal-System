@@ -1,6 +1,7 @@
 # Database Configuration
 # Node: connection/
 database.php
+db_scripts/
 
 # Temporary files
 tmp/

@@ -3,7 +3,7 @@
   "name": "disposal-system",
   "builds": [
     {
-      "src": "index.php",
+      "src": "/index.php",
       "use": "vercel-community/php"
     },
     {
@@ -16,9 +16,21 @@
     }
   ],
   "routes": [
-    { "src": "/(assets|styles)/(.*)", "dest": "/$1/$2" },
-    { "src": "/api/(.*)", "dest": "/api/$1.php" },
-    { "src": "/pages/(.*)", "dest": "/pages/$1.php" },
-    { "src": "/(.*)", "dest": "/pages/index.php" }
+    {
+      "src": "/(assets|styles)/(.*)",
+      "dest": "/$1/$2"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.php"
+    },
+    {
+      "src": "/pages/(.*)",
+      "dest": "/pages/$1.php"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/pages/index.php"
+    }
   ]
 }

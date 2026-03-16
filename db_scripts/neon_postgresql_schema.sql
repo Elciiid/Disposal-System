@@ -1,41 +1,41 @@
 -- Disposal System - PostgreSQL Schema (Neon Compatible)
--- Idempotent Version: Safe to run multiple times.
+-- Idempotent Version: Safe to run multiple times, even if unique constraints are missing.
 
 -- 1. Phases
 CREATE TABLE IF NOT EXISTS wst_Phases (
     PhaseID SERIAL PRIMARY KEY,
-    PhaseName VARCHAR(50) NOT NULL UNIQUE
+    PhaseName VARCHAR(50) NOT NULL
 );
 
 -- 2. Areas
 CREATE TABLE IF NOT EXISTS wst_Areas (
     AreaID SERIAL PRIMARY KEY,
-    AreaName VARCHAR(100) NOT NULL UNIQUE
+    AreaName VARCHAR(100) NOT NULL
 );
 
 -- 3. Shifts
 CREATE TABLE IF NOT EXISTS wst_Shifts (
     ShiftID SERIAL PRIMARY KEY,
-    ShiftName VARCHAR(50) NOT NULL UNIQUE
+    ShiftName VARCHAR(50) NOT NULL
 );
 
 -- 4. Log Types (Waste, Transfer, etc.)
 CREATE TABLE IF NOT EXISTS wst_LogTypes (
     TypeID SERIAL PRIMARY KEY,
-    TypeName VARCHAR(100) NOT NULL UNIQUE
+    TypeName VARCHAR(100) NOT NULL
 );
 
 -- 5. Product Categories
 CREATE TABLE IF NOT EXISTS wst_PCategories (
     CategoryID SERIAL PRIMARY KEY,
-    CategoryName VARCHAR(100) NOT NULL UNIQUE
+    CategoryName VARCHAR(100) NOT NULL
 );
 
 -- 6. Product Descriptions
 CREATE TABLE IF NOT EXISTS wst_PDescriptions (
     DescriptionID SERIAL PRIMARY KEY,
     CategoryID INT REFERENCES wst_PCategories(CategoryID),
-    DescriptionName VARCHAR(255) NOT NULL UNIQUE
+    DescriptionName VARCHAR(255) NOT NULL
 );
 
 -- 7. Main Logs Table
@@ -99,82 +99,77 @@ CREATE TABLE IF NOT EXISTS wst_RolePermissions (
 );
 
 -- ==========================================================
--- Initial Mock Data Seed (Uses ON CONFLICT to avoid errors)
+-- Initial Mock Data Seed (Robust Seeding)
 -- ==========================================================
 
 -- 1. Master Data
-INSERT INTO wst_Phases (PhaseName) VALUES ('Phase 1'), ('Phase 2'), ('Phase 3') ON CONFLICT (PhaseName) DO NOTHING;
-INSERT INTO wst_Areas (AreaName) VALUES ('Production Line A'), ('Production Line B'), ('Packaging Area'), ('Warehouse') ON CONFLICT (AreaName) DO NOTHING;
-INSERT INTO wst_Shifts (ShiftName) VALUES ('Day Shift (6AM-2PM)'), ('Afternoon Shift (2PM-10PM)'), ('Night Shift (10PM-6AM)') ON CONFLICT (ShiftName) DO NOTHING;
-INSERT INTO wst_LogTypes (TypeName) VALUES ('Waste'), ('Transfer'), ('Others') ON CONFLICT (TypeName) DO NOTHING;
+INSERT INTO wst_Phases (PhaseName) SELECT 'Phase 1' WHERE NOT EXISTS (SELECT 1 FROM wst_Phases WHERE PhaseName = 'Phase 1');
+INSERT INTO wst_Phases (PhaseName) SELECT 'Phase 2' WHERE NOT EXISTS (SELECT 1 FROM wst_Phases WHERE PhaseName = 'Phase 2');
+INSERT INTO wst_Phases (PhaseName) SELECT 'Phase 3' WHERE NOT EXISTS (SELECT 1 FROM wst_Phases WHERE PhaseName = 'Phase 3');
+
+INSERT INTO wst_Areas (AreaName) SELECT 'Production Line A' WHERE NOT EXISTS (SELECT 1 FROM wst_Areas WHERE AreaName = 'Production Line A');
+INSERT INTO wst_Areas (AreaName) SELECT 'Production Line B' WHERE NOT EXISTS (SELECT 1 FROM wst_Areas WHERE AreaName = 'Production Line B');
+INSERT INTO wst_Areas (AreaName) SELECT 'Packaging Area' WHERE NOT EXISTS (SELECT 1 FROM wst_Areas WHERE AreaName = 'Packaging Area');
+INSERT INTO wst_Areas (AreaName) SELECT 'Warehouse' WHERE NOT EXISTS (SELECT 1 FROM wst_Areas WHERE AreaName = 'Warehouse');
+
+INSERT INTO wst_Shifts (ShiftName) SELECT 'Day Shift (6AM-2PM)' WHERE NOT EXISTS (SELECT 1 FROM wst_Shifts WHERE ShiftName = 'Day Shift (6AM-2PM)');
+INSERT INTO wst_Shifts (ShiftName) SELECT 'Afternoon Shift (2PM-10PM)' WHERE NOT EXISTS (SELECT 1 FROM wst_Shifts WHERE ShiftName = 'Afternoon Shift (2PM-10PM)');
+INSERT INTO wst_Shifts (ShiftName) SELECT 'Night Shift (10PM-6AM)' WHERE NOT EXISTS (SELECT 1 FROM wst_Shifts WHERE ShiftName = 'Night Shift (10PM-6AM)');
+
+INSERT INTO wst_LogTypes (TypeName) SELECT 'Waste' WHERE NOT EXISTS (SELECT 1 FROM wst_LogTypes WHERE TypeName = 'Waste');
+INSERT INTO wst_LogTypes (TypeName) SELECT 'Transfer' WHERE NOT EXISTS (SELECT 1 FROM wst_LogTypes WHERE TypeName = 'Transfer');
+INSERT INTO wst_LogTypes (TypeName) SELECT 'Others' WHERE NOT EXISTS (SELECT 1 FROM wst_LogTypes WHERE TypeName = 'Others');
 
 -- 2. Categories & Descriptions
-INSERT INTO wst_PCategories (CategoryName) VALUES ('Raw Materials'), ('Finished Goods'), ('Packaging Materials') ON CONFLICT (CategoryName) DO NOTHING;
+INSERT INTO wst_PCategories (CategoryName) SELECT 'Raw Materials' WHERE NOT EXISTS (SELECT 1 FROM wst_PCategories WHERE CategoryName = 'Raw Materials');
+INSERT INTO wst_PCategories (CategoryName) SELECT 'Finished Goods' WHERE NOT EXISTS (SELECT 1 FROM wst_PCategories WHERE CategoryName = 'Finished Goods');
+INSERT INTO wst_PCategories (CategoryName) SELECT 'Packaging Materials' WHERE NOT EXISTS (SELECT 1 FROM wst_PCategories WHERE CategoryName = 'Packaging Materials');
 
--- Descriptions (Mocking a few with IDs)
-INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) VALUES 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Raw Materials'), 'Sugar (Premium)'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Raw Materials'), 'Flour (All-Purpose)'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Raw Materials'), 'Vegetable Oil'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Raw Materials'), 'Food Coloring (Red)')
-ON CONFLICT (DescriptionName) DO NOTHING;
+-- Descriptions
+INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) 
+SELECT (SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Raw Materials'), 'Sugar (Premium)' 
+WHERE NOT EXISTS (SELECT 1 FROM wst_PDescriptions WHERE DescriptionName = 'Sugar (Premium)');
 
-INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) VALUES 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Finished Goods'), 'Sweet Biscuits (Box 24s)'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Finished Goods'), 'Crackers (Pouch 100g)'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Finished Goods'), 'Cream Sandwich (Pack 12s)')
-ON CONFLICT (DescriptionName) DO NOTHING;
+INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) 
+SELECT (SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Raw Materials'), 'Flour (All-Purpose)' 
+WHERE NOT EXISTS (SELECT 1 FROM wst_PDescriptions WHERE DescriptionName = 'Flour (All-Purpose)');
 
-INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) VALUES 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Packaging Materials'), 'Cardboard Box (Size L)'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Packaging Materials'), 'Plastic Wrap (Roll)'), 
-((SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Packaging Materials'), 'Labels (Batch Print)')
-ON CONFLICT (DescriptionName) DO NOTHING;
+INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) 
+SELECT (SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Finished Goods'), 'Sweet Biscuits (Box 24s)' 
+WHERE NOT EXISTS (SELECT 1 FROM wst_PDescriptions WHERE DescriptionName = 'Sweet Biscuits (Box 24s)');
+
+INSERT INTO wst_PDescriptions (CategoryID, DescriptionName) 
+SELECT (SELECT CategoryID FROM wst_PCategories WHERE CategoryName = 'Packaging Materials'), 'Cardboard Box (Size L)' 
+WHERE NOT EXISTS (SELECT 1 FROM wst_PDescriptions WHERE DescriptionName = 'Cardboard Box (Size L)');
 
 -- 3. Roles & Permissions
-INSERT INTO wst_Roles (RoleName) VALUES ('Supervisor'), ('Manager'), ('Internal Security'), ('Admin') ON CONFLICT (RoleName) DO NOTHING;
+INSERT INTO wst_Roles (RoleName) SELECT 'Supervisor' WHERE NOT EXISTS (SELECT 1 FROM wst_Roles WHERE RoleName = 'Supervisor');
+INSERT INTO wst_Roles (RoleName) SELECT 'Manager' WHERE NOT EXISTS (SELECT 1 FROM wst_Roles WHERE RoleName = 'Manager');
+INSERT INTO wst_Roles (RoleName) SELECT 'Internal Security' WHERE NOT EXISTS (SELECT 1 FROM wst_Roles WHERE RoleName = 'Internal Security');
+INSERT INTO wst_Roles (RoleName) SELECT 'Admin' WHERE NOT EXISTS (SELECT 1 FROM wst_Roles WHERE RoleName = 'Admin');
 
-INSERT INTO wst_Permissions (PermissionKey, Description) VALUES 
-('submit_logs', 'Can submit new waste logs'),
-('view_history', 'Can view history of logs'),
-('view_own_submissions', 'Can view own submitted logs'),
-('approve_step1', 'Can perform Step 1 (Manager) approvals'),
-('approve_step2', 'Can perform Step 2 (Security) approvals'),
-('access_settings', 'Can access system configuration'),
-('export_csv', 'Can export logs to CSV')
-ON CONFLICT (PermissionKey) DO NOTHING;
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'submit_logs', 'Can submit new waste logs' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'submit_logs');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'view_history', 'Can view history of logs' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'view_history');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'approve_step1', 'Can perform Step 1 (Manager) approvals' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'approve_step1');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'approve_step2', 'Can perform Step 2 (Security) approvals' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'approve_step2');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'access_settings', 'Can access system configuration' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'access_settings');
 
--- Assign Permissions to Roles (Dynamic lookup to avoid hardcoded IDs)
+-- Assign Permissions
 INSERT INTO wst_RolePermissions (RoleID, PermissionID) 
 SELECT r.RoleID, p.PermissionID FROM wst_Roles r, wst_Permissions p
 WHERE r.RoleName = 'Admin'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM wst_RolePermissions WHERE RoleID = r.RoleID AND PermissionID = p.PermissionID);
 
-INSERT INTO wst_RolePermissions (RoleID, PermissionID) 
-SELECT r.RoleID, p.PermissionID FROM wst_Roles r, wst_Permissions p
-WHERE r.RoleName = 'Supervisor' AND p.PermissionKey IN ('submit_logs', 'view_own_submissions', 'view_history')
-ON CONFLICT DO NOTHING;
+-- 4. Mock Users (Password: password123)
+INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) 
+SELECT '3096', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'System Administrator', 'EMP-001', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Admin'), NULL, NULL
+WHERE NOT EXISTS (SELECT 1 FROM wst_Users WHERE Username = '3096');
 
-INSERT INTO wst_RolePermissions (RoleID, PermissionID) 
-SELECT r.RoleID, p.PermissionID FROM wst_Roles r, wst_Permissions p
-WHERE r.RoleName = 'Manager' AND p.PermissionKey IN ('approve_step1', 'view_history')
-ON CONFLICT DO NOTHING;
+INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) 
+SELECT '5678', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'Juan Dela Cruz', 'EMP-002', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Manager'), (SELECT PhaseID FROM wst_Phases WHERE PhaseName = 'Phase 1'), NULL
+WHERE NOT EXISTS (SELECT 1 FROM wst_Users WHERE Username = '5678');
 
-INSERT INTO wst_RolePermissions (RoleID, PermissionID) 
-SELECT r.RoleID, p.PermissionID FROM wst_Roles r, wst_Permissions p
-WHERE r.RoleName = 'Internal Security' AND p.PermissionKey IN ('approve_step2', 'view_history', 'export_csv')
-ON CONFLICT DO NOTHING;
-
--- 4. Mock Users (Password for all is 'password123')
-INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) VALUES 
-('3096', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'System Administrator', 'EMP-001', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Admin'), NULL, NULL),
-('5678', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'Juan Dela Cruz', 'EMP-002', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Manager'), (SELECT PhaseID FROM wst_Phases WHERE PhaseName = 'Phase 1'), NULL),
-('1234', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'Maria Clara', 'EMP-003', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Supervisor'), (SELECT PhaseID FROM wst_Phases WHERE PhaseName = 'Phase 1'), (SELECT AreaID FROM wst_Areas WHERE AreaName = 'Production Line A')),
-('9999', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'Chief Security', 'EMP-004', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Internal Security'), NULL, NULL)
-ON CONFLICT (Username) DO NOTHING;
-
--- 5. Sample Logs (Optional)
--- Only inserting if table is empty to avoid duplicates on multiple runs
-INSERT INTO wst_Logs (LogDate, TypeID, PhaseID, AreaID, ShiftID, CategoryID, DescriptionID, KG, Reason, SubmittedBy, CurrentStep, ApprovalStatus, Step1ApprovedBy, Step1ApprovedAt, Step2ApprovedBy, Step2ApprovedAt) 
-SELECT CURRENT_TIMESTAMP - INTERVAL '2 days', 1, 1, 1, 1, 1, 1, 15.50, 'Expired stock discovered during audit', '1234', 3, 'Approved', '5678', CURRENT_TIMESTAMP - INTERVAL '1 day', '9999', CURRENT_TIMESTAMP - INTERVAL '12 hours'
+-- 5. Sample Log (Optional)
+INSERT INTO wst_Logs (LogDate, TypeID, PhaseID, AreaID, ShiftID, CategoryID, DescriptionID, KG, Reason, SubmittedBy, CurrentStep, ApprovalStatus) 
+SELECT CURRENT_TIMESTAMP, 1, 1, 1, 1, 1, 1, 10.00, 'Mock entry for testing', '3096', 1, 'Pending'
 WHERE NOT EXISTS (SELECT 1 FROM wst_Logs LIMIT 1);
