@@ -29,10 +29,10 @@ function bootstrapSession(array $user, $masterInfo): void
     $_SESSION['position']    = $position;
 
     // Production System Roles
-    $_SESSION['wst_role_id']   = $user['RoleID'] ?? null;
-    $_SESSION['wst_role_name'] = $user['RoleName'] ?? null;
-    $_SESSION['wst_area_id']   = $user['AreaID'] ?? null;
-    $_SESSION['wst_phase_id']  = $user['PhaseID'] ?? null;
+    $_SESSION['wst_role_id']   = $user['role_id'] ?? null;
+    $_SESSION['wst_role_name'] = $user['role_name'] ?? null;
+    $_SESSION['wst_area_id']   = $user['area_id'] ?? null;
+    $_SESSION['wst_phase_id']  = $user['phase_id'] ?? null;
 
     $_SESSION['avatar'] = getEmployeePhotoUrl($user['username']);
 }

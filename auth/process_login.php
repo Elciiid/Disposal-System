@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $stmt = $conn->prepare("
-            SELECT u.UserID as user_id, u.Username as username, u.Password as password, u.FullName as full_name, r.RoleName as role,
-                   u.RoleID, r.RoleName as wst_role_name, u.AreaID, u.PhaseID, u.EmployeeID
+            SELECT u.UserID as user_id, u.Username as username, u.Password as password, u.FullName as full_name, r.RoleName as role_name,
+                   u.RoleID as role_id, u.AreaID as area_id, u.PhaseID as phase_id, u.EmployeeID as employee_id
             FROM wst_Users u
             LEFT JOIN wst_Roles r ON u.RoleID = r.RoleID
             WHERE u.Username = ?
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Login successful — use shared bootstrap (DRY)
             require_once __DIR__ . '/auth_helpers.php';
             bootstrapSession($user, [
-                'PositionTitle' => $user['role'],
+                'PositionTitle' => $user['role_name'],
                 'FirstName'     => $user['full_name'],
                 'EmployeeID'    => $user['employee_id']
             ]);
