@@ -1,10 +1,9 @@
 {
-  "version": 2,
   "builds": [
     { "src": "index.php", "use": "vercel-community/php" },
     { "src": "test_connection.php", "use": "vercel-community/php" },
-    { "src": "pages/*.php", "use": "vercel-community/php" },
     { "src": "api/*.php", "use": "vercel-community/php" },
+    { "src": "pages/*.php", "use": "vercel-community/php" },
     { "src": "auth/*.php", "use": "vercel-community/php" }
   ],
   "routes": [
