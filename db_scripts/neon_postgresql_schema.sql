@@ -150,8 +150,10 @@ INSERT INTO wst_Roles (RoleName) SELECT 'Admin' WHERE NOT EXISTS (SELECT 1 FROM 
 
 INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'submit_logs', 'Can submit new waste logs' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'submit_logs');
 INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'view_history', 'Can view history of logs' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'view_history');
-INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'approve_step1', 'Can perform Step 1 (Manager) approvals' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'approve_step1');
-INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'approve_step2', 'Can perform Step 2 (Security) approvals' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'approve_step2');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'view_own_submissions', 'Can view their own submissions' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'view_own_submissions');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'view_daily_products', 'Can view daily products page' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'view_daily_products');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'approve_step_1', 'Can perform Step 1 (Manager) approvals' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'approve_step_1');
+INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'approve_step_2', 'Can perform Step 2 (Security) approvals' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'approve_step_2');
 INSERT INTO wst_Permissions (PermissionKey, Description) SELECT 'access_settings', 'Can access system configuration' WHERE NOT EXISTS (SELECT 1 FROM wst_Permissions WHERE PermissionKey = 'access_settings');
 
 -- Assign Permissions
@@ -162,7 +164,7 @@ AND NOT EXISTS (SELECT 1 FROM wst_RolePermissions WHERE RoleID = r.RoleID AND Pe
 
 -- 4. Mock Users (Password: password123)
 INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) 
-SELECT '3096', 'password123', 'System Administrator', 'EMP-001', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Admin'), NULL, NULL
+SELECT '3096', 'password123', 'Super Admin', 'EMP-001', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Admin'), NULL, NULL
 WHERE NOT EXISTS (SELECT 1 FROM wst_Users WHERE Username = '3096');
 
 INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) 
