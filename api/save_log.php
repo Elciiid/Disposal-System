@@ -18,7 +18,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $shiftId       = $_POST['ShiftID'] ?? null;
     $categoryId    = $_POST['CategoryID'] ?? null;
     $descriptionId = $_POST['DescriptionID'] ?? null;
-    $pcs           = !empty($_POST['PCS']) ? $_POST['PCS'] : null;
     $kg            = !empty($_POST['KG']) ? $_POST['KG'] : null;
     $reason          = $_POST['Reason'] ?? '';
     $otherTypeRemark = $_POST['OtherTypeRemark'] ?? null;

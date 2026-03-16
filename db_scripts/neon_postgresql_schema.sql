@@ -47,7 +47,6 @@ CREATE TABLE wst_Logs (
     ShiftID INT REFERENCES wst_Shifts(ShiftID),
     CategoryID INT REFERENCES wst_PCategories(CategoryID),
     DescriptionID INT REFERENCES wst_PDescriptions(DescriptionID),
-    PCS INT,
     KG DECIMAL(10,2),
     Reason TEXT,
     OtherTypeRemark TEXT,
@@ -60,12 +59,6 @@ CREATE TABLE wst_Logs (
     Step1ApprovedAt TIMESTAMP,
     Step2ApprovedBy VARCHAR(100),
     Step2ApprovedAt TIMESTAMP,
-    Step3ApprovedBy VARCHAR(100),
-    Step3ApprovedAt TIMESTAMP,
-    Step4ApprovedBy VARCHAR(100),
-    Step4ApprovedAt TIMESTAMP,
-    Step5ApprovedBy VARCHAR(100),
-    Step5ApprovedAt TIMESTAMP,
     
     RejectedBy VARCHAR(100),
     RejectionReason TEXT

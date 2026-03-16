@@ -8,7 +8,7 @@
  * Get top 3 distribution of waste by category.
  */
 function getWasteDistributionByCategory($conn) {
-    $sql = "SELECT c.CategoryName, COUNT(w.LogID) as log_count, SUM(w.KG) as total_kg, SUM(w.PCS) as total_pcs
+    $sql = "SELECT c.CategoryName, COUNT(w.LogID) as log_count, SUM(w.KG) as total_kg
             FROM wst_PCategories c
             LEFT JOIN wst_Logs w ON c.CategoryID = w.CategoryID
             GROUP BY c.CategoryName
@@ -223,7 +223,7 @@ function getWasteStatsFiltered($conn, $timeScale = 'daily') {
         $totalLogs = $conn->query("SELECT COUNT(*) FROM wst_Logs WHERE $dateCondition")->fetchColumn();
 
         // Filtered weights
-        $stmt = $conn->query("SELECT SUM(KG) as total_kg, SUM(PCS) as total_pcs FROM wst_Logs WHERE $dateCondition");
+        $stmt = $conn->query("SELECT SUM(KG) as total_kg FROM wst_Logs WHERE $dateCondition");
         $weights = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Filtered "Others" count
@@ -265,7 +265,7 @@ function getWasteStats($conn) {
         $todayLogsResult = $conn->query("SELECT COUNT(*) FROM wst_Logs WHERE LogDate::date = CURRENT_DATE")->fetchColumn();
         
         // Weights
-        $stmt = $conn->query("SELECT SUM(KG) as total_kg, SUM(PCS) as total_pcs FROM wst_Logs");
+        $stmt = $conn->query("SELECT SUM(KG) as total_kg FROM wst_Logs");
         $weights = $stmt->fetch(PDO::FETCH_ASSOC);
         
         // Log types distribution (Waste vs Transfer)

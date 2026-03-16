@@ -223,7 +223,7 @@ require_once '../components/header.php';
                 <div id="modalProduct" class="fw-medium mt-1"></div>
             </div>
             <div class="col-12 mt-3 pt-3 border-top border-light">
-                <span class="text-muted text-uppercase" style="font-size: 0.75rem; font-weight: 600;">Quantity</span>
+                <span class="text-muted text-uppercase" style="font-size: 0.75rem; font-weight: 600;">Weight (KG)</span>
                 <div id="modalQty" class="fw-bold fs-5 mt-1" style="color: #6366f1;"></div>
             </div>
             <div class="col-12 mt-3 p-3 rounded-3 d-none" style="background-color: #fffbeb; border: 1px solid #fde68a;" id="modalOtherTypeContainer">
@@ -257,11 +257,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalProduct').textContent = log.DescriptionName || 'N/A';
             
             let qtyText = '';
-            if (log.PCS) qtyText += log.PCS + ' pcs ';
             if (log.KG) {
                 let kgDisplay = String(log.KG);
                 if (kgDisplay.startsWith('.')) kgDisplay = '0' + kgDisplay;
-                qtyText += (log.PCS ? '| ' : '') + kgDisplay + ' kg';
+                qtyText = kgDisplay + ' kg';
             }
             document.getElementById('modalQty').textContent = qtyText || '0';
             

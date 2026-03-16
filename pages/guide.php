@@ -482,7 +482,7 @@ $currentUser = getCurrentUser();
                             <div class="feature-tile">
                                 <div class="tile-icon" style="background: #f0fdf4; color: #22c55e;"><ion-icon name="trending-up"></ion-icon></div>
                                 <h6>Real-time KPIs</h6>
-                                <p>Track total waste in KG & PCS with comparison to previous periods.</p>
+                                <p>Track total waste in KG with comparison to previous periods.</p>
                             </div>
                             <div class="feature-tile">
                                 <div class="tile-icon" style="background: #f5f3ff; color: #8b5cf6;"><ion-icon name="calendar"></ion-icon></div>
@@ -505,7 +505,7 @@ $currentUser = getCurrentUser();
                         </div>
 
                         <div class="step-card"><div class="step-number">1</div><div><h6 class="fw-bold mb-1">Select Categories</h6><p class="text-muted mb-0" style="font-size: 0.83rem;">Choose Shift, Area, Phase, Log Type, Category, and Product from the dropdown menus.</p></div></div>
-                        <div class="step-card"><div class="step-number">2</div><div><h6 class="fw-bold mb-1">Input Quantities</h6><p class="text-muted mb-0" style="font-size: 0.83rem;">Enter waste in Pieces (PCS), Kilograms (KG), or both depending on the category.</p></div></div>
+                        <div class="step-card"><div class="step-number">2</div><div><h6 class="fw-bold mb-1">Input Quantities</h6><p class="text-muted mb-0" style="font-size: 0.83rem;">Enter waste weight in Kilograms (KG).</p></div></div>
                         <div class="step-card"><div class="step-number">3</div><div><h6 class="fw-bold mb-1">Specify Reason</h6><p class="text-muted mb-0" style="font-size: 0.83rem;">Type a clear, concise justification for the waste to aid review by approvers.</p></div></div>
                         <div class="step-card"><div class="step-number">4</div><div><h6 class="fw-bold mb-1">Submit</h6><p class="text-muted mb-0" style="font-size: 0.83rem;">Click <strong style="color: var(--accent-yellow); background: #202227; padding: 2px 6px; border-radius: 5px; font-size: 0.78rem;">Submit Daily Log</strong> to forward it into the approval chain.</p></div></div>
                     </div>
