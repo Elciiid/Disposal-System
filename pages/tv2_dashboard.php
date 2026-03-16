@@ -1,8 +1,8 @@
 <?php
 // Removed auth.php to prevent unexpected redirect loops on passive wall displays
 
-require_once '../connection/database.php';
-require_once '../utils/analytics_helper.php';
+require_once __DIR__ . '/../connection/database.php';
+require_once __DIR__ . '/../utils/analytics_helper.php';
 
 $phaseId = isset($_GET['phase']) ? (int)$_GET['phase'] : 2; // Default to Phase 2
 $matrix = getTVBoardMetrics($conn, $phaseId);

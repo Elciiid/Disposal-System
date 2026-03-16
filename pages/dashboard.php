@@ -9,7 +9,7 @@ $currentUser = getCurrentUser();
 // Dashboard is now public to all logged-in staff
 
 // Note: pending data is now computed once here and shared with sidebar/topbar components
-require_once '../api/approval_workflow.php';
+require_once __DIR__ . '/../api/approval_workflow.php';
 $approvalCtx = getApprovalContext($conn);
 $pendingLogs = $approvalCtx['pendingLogs'];
 $latestPendingLogs = $approvalCtx['latestPendingLogs'];
@@ -40,24 +40,24 @@ try {
     $trends = getDailyWasteTrends($conn);
     
 } catch(PDOException $e) {
-    require_once '../utils/functions.php';
+    require_once __DIR__ . '/../utils/functions.php';
     handleSystemError("Dashboard Stats Error: " . $e->getMessage(), 'dashboard.php');
 }
 ?>
 <?php
 $pageTitle = 'Dashboard - Waste Logs';
 $extraCSS = ['supervisor.css'];
-require_once '../components/header.php';
+require_once __DIR__ . '/../components/header.php';
 ?>
 <body>
 
 <div class="dashboard-wrapper">
     <!-- Left Sidebar Panel -->
-    <?php include '../components/sidebar.php'; ?>
+    <?php include __DIR__ . '/../components/sidebar.php'; ?>
 
     <!-- Main Content Panel -->
     <main class="main-content">
-        <?php include '../components/topbar.php'; ?>
+        <?php include __DIR__ . '/../components/topbar.php'; ?>
 
         <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
             <div>
@@ -265,7 +265,7 @@ require_once '../components/header.php';
     </main>
 </div>
 
-<?php require_once '../components/scripts.php'; ?>
+<?php require_once __DIR__ . '/../components/scripts.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>

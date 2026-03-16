@@ -11,8 +11,8 @@ if (!hasPermission($conn, 'submit_logs')) {
     exit();
 }
 
-require_once '../utils/functions.php';
-require_once '../api/approval_workflow.php';
+require_once __DIR__ . '/../utils/functions.php';
+require_once __DIR__ . '/../api/approval_workflow.php';
 $approvalCtx = getApprovalContext($conn);
 $pendingCount = $approvalCtx['pendingCount'];
 $pendingLogs = $approvalCtx['pendingLogs'];
@@ -29,17 +29,17 @@ $phases       = fetchAllFromTable($conn, 'wst_Phases', 'PhaseName');
 <?php
 $pageTitle = 'Production Waste Log';
 $extraCSS = ['supervisor.css'];
-require_once '../components/header.php';
+require_once __DIR__ . '/../components/header.php';
 ?>
 <body>
 
 <div class="dashboard-wrapper">
     <!-- Left Sidebar Panel -->
-    <?php include '../components/sidebar.php'; ?>
+    <?php include __DIR__ . '/../components/sidebar.php'; ?>
 
     <!-- Main Content Panel -->
     <main class="main-content">
-        <?php include '../components/topbar.php'; ?>
+        <?php include __DIR__ . '/../components/topbar.php'; ?>
 
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
@@ -215,7 +215,7 @@ require_once '../components/header.php';
     </main>
 </div>
 
-<?php require_once '../components/scripts.php'; ?>
+<?php require_once __DIR__ . '/../components/scripts.php'; ?>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const productSearch = document.getElementById('productSearch');

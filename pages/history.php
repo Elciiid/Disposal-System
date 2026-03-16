@@ -16,7 +16,7 @@ $pendingCount = $approvalCtx['pendingCount'];
 $pendingLogs = $approvalCtx['pendingLogs'];
 $latestPendingLogs = $approvalCtx['latestPendingLogs'];
 
-require_once '../utils/functions.php';
+require_once __DIR__ . '/../utils/functions.php';
 
 // Collect URL filters for history
 $filters = [
@@ -44,17 +44,17 @@ $logs = getWasteLogs($conn, $filters['status'], $filters);
 <?php
 $pageTitle = 'History Logs - Waste Logs';
 $extraCSS = ['supervisor.css'];
-require_once '../components/header.php';
+require_once __DIR__ . '/../components/header.php';
 ?>
 <body>
 
 <div class="dashboard-wrapper">
     <!-- Left Sidebar Panel -->
-    <?php include '../components/sidebar.php'; ?>
+    <?php include __DIR__ . '/../components/sidebar.php'; ?>
 
     <!-- Main Content Panel -->
     <main class="main-content">
-        <?php include '../components/topbar.php'; ?>
+        <?php include __DIR__ . '/../components/topbar.php'; ?>
 
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
@@ -337,7 +337,7 @@ require_once '../components/header.php';
   </div>
 </div>
 
-<?php require_once '../components/scripts.php'; ?>
+<?php require_once __DIR__ . '/../components/scripts.php'; ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const detailsModal = document.getElementById('detailsModal');

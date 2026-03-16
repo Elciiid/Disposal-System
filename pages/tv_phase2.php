@@ -1,4 +1,4 @@
 <?php
 $_GET['phase'] = 2;
-require_once 'tv_dashboard.php';
+require_once __DIR__ . '/tv_dashboard.php';
 ?>

@@ -33,10 +33,10 @@ require_once __DIR__ . '/../utils/ui_helpers.php';
 <body class="settings-page-active">
 
 <div class="dashboard-wrapper">
-    <?php include '../components/sidebar.php'; ?>
+    <?php include __DIR__ . '/../components/sidebar.php'; ?>
 
     <main class="main-content">
-        <?php include '../components/topbar.php'; ?>
+        <?php include __DIR__ . '/../components/topbar.php'; ?>
 
         <div class="d-flex justify-content-between align-items-end mb-3">
             <div>
@@ -427,7 +427,7 @@ require_once __DIR__ . '/../utils/ui_helpers.php';
     </div>
 </div>
 
-<?php require_once '../components/scripts.php'; ?>
+<?php require_once __DIR__ . '/../components/scripts.php'; ?>
 <script>
 // ============================================================
 // Dynamic Pagination State
