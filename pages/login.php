@@ -4,6 +4,12 @@ if (isset($_SESSION['user_id']) || isset($_SESSION['username'])) {
     header("Location: dashboard.php");
     exit();
 }
+
+// Fallback: If session error is missing but URL error exists
+if (empty($_SESSION['login_error']) && !empty($_GET['error'])) {
+    if ($_GET['error'] === 'invalid') $_SESSION['login_error'] = "Invalid username or password.";
+    elseif ($_GET['error'] === 'db') $_SESSION['login_error'] = "Database connection error.";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

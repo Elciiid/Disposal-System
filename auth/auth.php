@@ -18,8 +18,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['employee_id']) || !isset($
     require_once __DIR__ . '/../connection/database.php';
     try {
             $stmt = $conn->prepare("
-                SELECT u.UserID as user_id, u.Username as username, u.FullName as full_name, r.RoleName as role,
-                       u.RoleID, r.RoleName, u.AreaID, u.PhaseID, u.EmployeeID
+                SELECT u.UserID as user_id, u.Username as username, u.FullName as full_name, r.RoleName as role_name,
+                       u.RoleID as role_id, u.AreaID as area_id, u.PhaseID as phase_id, u.EmployeeID as employee_id
                 FROM wst_Users u
                 LEFT JOIN wst_Roles r ON u.RoleID = r.RoleID
                 WHERE u." . (isset($_SESSION['user_id']) ? "UserID" : "Username") . " = ?
@@ -31,10 +31,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['employee_id']) || !isset($
         if ($user) {
             // Login successful
             bootstrapSession($user, [
-                'PositionTitle' => $user['role'],
+                'PositionTitle' => $user['role_name'],
                 'FirstName'     => $user['full_name'],
                 'EmployeeID'    => $user['employee_id']
             ]);
+            session_write_close();
         } else {
             // User ID in session but not found in DB? Clear and redirect.
             session_destroy();

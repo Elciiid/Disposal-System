@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && $password === $user['password']) {
+        if ($user && trim($password) === trim($user['password'])) {
             // Login successful — use shared bootstrap (DRY)
             require_once __DIR__ . '/auth_helpers.php';
             bootstrapSession($user, [
@@ -32,18 +32,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'EmployeeID'    => $user['employee_id']
             ]);
             
+            error_log("Login Successful for user: $username. Redirecting to dashboard.");
+            session_write_close();
             header("Location: ../pages/dashboard.php");
             exit();
         } else {
-            // Login failed
-            $_SESSION['login_error'] = "Invalid username or password.";
-            header("Location: ../pages/login.php");
+            // Login failed - be more specific for debugging
+            if (!$user) {
+                $_SESSION['login_error'] = "User not found in database.";
+                error_log("Login Failed: User '$username' not found.");
+            } else {
+                $_SESSION['login_error'] = "Password mismatch. Please check your credentials.";
+                error_log("Login Failed: Password mismatch for user '$username'.");
+            }
+            session_write_close();
+            header("Location: ../pages/login.php?error=invalid");
             exit();
         }
     } catch (PDOException $e) {
         // TEMPORARY: Exposing the exact DB error for debugging IT account login failure
         $_SESSION['login_error'] = "Authentication error: " . $e->getMessage();
-        header("Location: ../pages/login.php");
+        session_write_close();
+        header("Location: ../pages/login.php?error=db");
         exit();
     }
 } else {
