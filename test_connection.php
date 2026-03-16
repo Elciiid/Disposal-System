@@ -77,9 +77,28 @@ try {
     }
     echo "</ul>";
 
-    // 3. Check for mock users
+    // 3. Check for mock users and verify password hash
     $userCount = $conn->query("SELECT COUNT(*) FROM wst_Users")->fetchColumn();
     echo "<p><strong>Mock Users Found:</strong> $userCount</p>";
+
+    if ($userCount > 0) {
+        $stmt = $conn->prepare("SELECT password FROM wst_Users WHERE username = '3096'");
+        $stmt->execute();
+        $hash = $stmt->fetchColumn();
+        
+        echo "<h3>Password Verification Check (User 3096):</h3>";
+        if ($hash) {
+            $isValid = password_verify('password123', $hash);
+            if ($isValid) {
+                echo "<p style='color: green;'>✅ Password 'password123' is VALID for user 3096.</p>";
+            } else {
+                echo "<p style='color: red;'>❌ Password 'password123' is INVALID for user 3096.</p>";
+                echo "<p>Stored Hash: <code>$hash</code></p>";
+            }
+        } else {
+            echo "<p style='color: orange;'>⚠️ User 3096 not found for password check.</p>";
+        }
+    }
 
 } catch (PDOException $e) {
     echo "<p style='color: red;'>❌ Connection Failed!</p>";
