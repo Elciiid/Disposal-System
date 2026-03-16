@@ -1,13 +1,12 @@
-<?php
-require_once '../auth/auth.php';
-require_once '../connection/database.php';
-require_once '../auth/access_control.php';
-require_once '../utils/functions.php';
+require_once __DIR__ . '/../auth/auth.php';
+require_once __DIR__ . '/../connection/database.php';
+require_once __DIR__ . '/../auth/access_control.php';
+require_once __DIR__ . '/../utils/functions.php';
 
 $currentUser = getCurrentUser();
 requireSupervisorAccess($conn, $currentUser);
 
-require_once '../api/approval_workflow.php';
+require_once __DIR__ . '/../api/approval_workflow.php';
 $approvalCtx = getApprovalContext($conn);
 $pendingCount = $approvalCtx['pendingCount'];
 $pendingLogs = $approvalCtx['pendingLogs'];
@@ -21,15 +20,15 @@ try {
 
     // We will fetch the large lists (Users, Descriptions, etc.) via AJAX to prevent lagginess
 } catch (Exception $e) {
-    require_once '../utils/functions.php';
+    require_once __DIR__ . '/../utils/functions.php';
     handleSystemError("Error fetching settings data: " . $e->getMessage());
 }
 ?>
 <?php
 $pageTitle = 'System Settings - Waste Logs';
 $extraCSS = ['supervisor.css', 'settings.css'];
-require_once '../components/header.php';
-require_once '../utils/ui_helpers.php';
+require_once __DIR__ . '/../components/header.php';
+require_once __DIR__ . '/../utils/ui_helpers.php';
 ?>
 <body class="settings-page-active">
 

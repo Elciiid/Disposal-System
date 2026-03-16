@@ -1,7 +1,6 @@
-<?php
-require_once '../auth/auth.php';
-require_once '../connection/database.php';
-require_once '../api/approval_workflow.php';
+require_once __DIR__ . '/../auth/auth.php';
+require_once __DIR__ . '/../connection/database.php';
+require_once __DIR__ . '/../api/approval_workflow.php';
 
 $currentUser = getCurrentUser();
 

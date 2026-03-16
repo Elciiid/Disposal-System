@@ -6,7 +6,7 @@
  * Response: JSON { success: bool, data: array, meta: { step, role, scope } }
  */
 session_start();
-require_once '../connection/database.php';
+require_once __DIR__ . '/../connection/database.php';
 require_once __DIR__ . '/approval_workflow.php';
 
 header('Content-Type: application/json');

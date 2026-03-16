@@ -1,9 +1,9 @@
 <?php
-require_once '../auth/auth.php';
-require_once '../connection/database.php';
-require_once '../utils/analytics_helper.php';
-require_once '../utils/functions.php'; // Added this line as per instruction
-require_once '../auth/access_control.php';
+require_once __DIR__ . '/../auth/auth.php';
+require_once __DIR__ . '/../connection/database.php';
+require_once __DIR__ . '/../utils/analytics_helper.php';
+require_once __DIR__ . '/../utils/functions.php'; // Added this line as per instruction
+require_once __DIR__ . '/../auth/access_control.php';
 
 $currentUser = getCurrentUser();
 // Dashboard is now public to all logged-in staff

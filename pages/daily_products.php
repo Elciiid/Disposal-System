@@ -1,7 +1,6 @@
-<?php
-require_once '../auth/auth.php';
-require_once '../connection/database.php';
-require_once '../auth/auth_helpers.php';
+require_once __DIR__ . '/../auth/auth.php';
+require_once __DIR__ . '/../connection/database.php';
+require_once __DIR__ . '/../auth/auth_helpers.php';
 
 // Check permission
 if (!hasPermission($conn, 'view_daily_products')) {

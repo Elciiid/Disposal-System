@@ -1,7 +1,7 @@
 <?php
-require_once '../auth/auth.php';
-require_once '../connection/database.php';
-require_once '../auth/access_control.php';
+require_once __DIR__ . '/../auth/auth.php';
+require_once __DIR__ . '/../connection/database.php';
+require_once __DIR__ . '/../auth/access_control.php';
 
 $currentUser = getCurrentUser();
 if (!hasSettingsAccess($conn, $currentUser['username'], $_SESSION['wst_role_name'] ?? null)) {

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../connection/database.php';
+require_once __DIR__ . '/../connection/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $submitterId = $_SESSION['username'] ?? null;
