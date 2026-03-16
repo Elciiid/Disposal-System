@@ -1,9 +1,11 @@
 {
+  "version": 2,
   "builds": [
-    {
-      "src": "**/*.php",
-      "use": "vercel-community/php"
-    }
+    { "src": "index.php", "use": "vercel-php@0.7.3" },
+    { "src": "test_connection.php", "use": "vercel-php@0.7.3" },
+    { "src": "pages/*.php", "use": "vercel-php@0.7.3" },
+    { "src": "api/*.php", "use": "vercel-php@0.7.3" },
+    { "src": "auth/*.php", "use": "vercel-php@0.7.3" }
   ],
   "routes": [
     { "src": "/(assets|styles)/(.*)", "dest": "/$1/$2" },
