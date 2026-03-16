@@ -14,6 +14,7 @@ echo "<h3>Debug Info:</h3>";
 echo "<ul>";
 echo "<li><strong>Current Dir (__DIR__):</strong> " . __DIR__ . "</li>";
 echo "<li><strong>Working Dir (getcwd):</strong> " . getcwd() . "</li>";
+echo "<li><strong>Document Root:</strong> " . $_SERVER['DOCUMENT_ROOT'] . "</li>";
 echo "</ul>";
 
 echo "<h4>Directory Listing (Root):</h4><pre>";
@@ -25,17 +26,22 @@ foreach($files as $file) {
 }
 echo "</pre>";
 
-if (is_dir(__DIR__ . '/connection')) {
-    echo "<h4>Directory Listing (connection/):</h4><pre>";
-    $conn_files = scandir(__DIR__ . '/connection');
-    foreach($conn_files as $file) {
-        if ($file === '.' || $file === '..') continue;
-        $type = is_dir(__DIR__ . '/connection/' . $file) ? '[DIR]' : '[FILE]';
-        echo "$type $file\n";
+$connDir = __DIR__ . '/connection';
+if (is_dir($connDir)) {
+    echo "<h4>Directory Listing ($connDir):</h4><pre>";
+    $conn_files = scandir($connDir);
+    if ($conn_files !== false) {
+        foreach($conn_files as $file) {
+            if ($file === '.' || $file === '..') continue;
+            $type = is_dir($connDir . '/' . $file) ? '[DIR]' : '[FILE]';
+            echo "$type $file\n";
+        }
+    } else {
+        echo "Could not scandir $connDir";
     }
     echo "</pre>";
 } else {
-    echo "<p style='color: orange;'>⚠️ connection/ is NOT a directory according to is_dir()</p>";
+    echo "<p style='color: orange;'>⚠️ connection/ directory NOT found at $connDir</p>";
 }
 
 $connectionFile = __DIR__ . '/connection/database.php';
