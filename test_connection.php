@@ -88,6 +88,7 @@ try {
         
         echo "<h3>Password Verification Check (User 3096):</h3>";
         if ($hash) {
+            $password_to_check = 'password123';
             $isValid = ($password_to_check === $hash);
             if ($isValid) {
                 echo "<p style='color: green;'>✅ Password '$password_to_check' is VALID for user 3096 (Plain Text).</p>";
