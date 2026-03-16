@@ -11,6 +11,10 @@ ini_set('display_errors', 1);
 echo "<h2>Disposal System: Database Connection Test</h2>";
 
 $connectionFile = __DIR__ . '/connection/database.php';
+if (!file_exists($connectionFile)) {
+    // Fallback for different environments
+    $connectionFile = 'connection/database.php';
+}
 
 if (!file_exists($connectionFile)) {
     echo "<p style='color: red;'>❌ Error: Connection file not found at: $connectionFile</p>";
