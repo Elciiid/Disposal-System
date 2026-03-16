@@ -64,7 +64,20 @@ CREATE TABLE wst_Logs (
     RejectionReason TEXT
 );
 
--- 8. Users
+-- 8. Roles
+CREATE TABLE wst_Roles (
+    RoleID SERIAL PRIMARY KEY,
+    RoleName VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 9. Permissions
+CREATE TABLE wst_Permissions (
+    PermissionID SERIAL PRIMARY KEY,
+    PermissionKey VARCHAR(100) UNIQUE NOT NULL,
+    Description TEXT
+);
+
+-- 10. Users
 CREATE TABLE wst_Users (
     UserID SERIAL PRIMARY KEY,
     Username VARCHAR(50) UNIQUE NOT NULL, -- Biometrics ID
@@ -77,7 +90,7 @@ CREATE TABLE wst_Users (
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 9. Role Permissions
+-- 11. Role Permissions
 CREATE TABLE wst_RolePermissions (
     RoleID INT REFERENCES wst_Roles(RoleID),
     PermissionID INT REFERENCES wst_Permissions(PermissionID),
