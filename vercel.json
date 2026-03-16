@@ -1,12 +1,11 @@
 {
   "version": 2,
-  "name": "disposal-system-prod",
   "builds": [
     { "src": "index.php", "use": "vercel-community/php" },
+    { "src": "test_connection.php", "use": "vercel-community/php" },
     { "src": "pages/*.php", "use": "vercel-community/php" },
     { "src": "api/*.php", "use": "vercel-community/php" },
-    { "src": "auth/*.php", "use": "vercel-community/php" },
-    { "src": "test_connection.php", "use": "vercel-community/php" }
+    { "src": "auth/*.php", "use": "vercel-community/php" }
   ],
   "routes": [
     { "src": "/(assets|styles)/(.*)", "dest": "/$1/$2" },

@@ -1,0 +1,8 @@
+# Exclude unnecessary files from Vercel build
+tmp/
+db_scripts/
+.git/
+.vscode/
+.idea/
+*.log
+node_modules/
