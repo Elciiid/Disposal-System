@@ -3,11 +3,11 @@ session_start();
 require_once __DIR__ . '/../connection/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+    $username = trim($_POST['username'] ?? '');
+    $password = trim($_POST['password'] ?? '');
 
     if (empty($username) || empty($password)) {
-        $_SESSION['login_error'] = "Please enter both username and password.";
+        setcookie('login_error', 'Please enter both username and password.', time() + 60, '/');
         header("Location: ../pages/login.php");
         exit();
     }
@@ -24,35 +24,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && trim($password) === trim($user['password'])) {
-            // Login successful — use shared bootstrap (DRY)
+            // Login successful — set auth cookie (works on serverless!)
+            $token = base64_encode(json_encode([
+                'user_id'  => $user['user_id'],
+                'username' => $user['username'],
+                'ts'       => time()
+            ]));
+
+            // Set cookie that lasts 24 hours
+            setcookie('auth_token', $token, [
+                'expires'  => time() + 86400,
+                'path'     => '/',
+                'secure'   => true,
+                'httponly'  => true,
+                'samesite'  => 'Lax'
+            ]);
+
+            // Also set session for local XAMPP compatibility
             require_once __DIR__ . '/auth_helpers.php';
             bootstrapSession($user, [
                 'PositionTitle' => $user['role_name'],
                 'FirstName'     => $user['full_name'],
                 'EmployeeID'    => $user['employee_id']
             ]);
-            
-            error_log("Login Successful for user: $username. Redirecting to dashboard.");
             session_write_close();
+
             header("Location: ../pages/dashboard.php");
             exit();
         } else {
-            // Login failed - be more specific for debugging
             if (!$user) {
-                $_SESSION['login_error'] = "User not found in database.";
-                error_log("Login Failed: User '$username' not found.");
+                setcookie('login_error', 'User not found in database.', time() + 60, '/');
             } else {
-                $_SESSION['login_error'] = "Password mismatch. Please check your credentials.";
-                error_log("Login Failed: Password mismatch for user '$username'.");
+                setcookie('login_error', 'Invalid password. Please try again.', time() + 60, '/');
             }
-            session_write_close();
             header("Location: ../pages/login.php?error=invalid");
             exit();
         }
     } catch (PDOException $e) {
-        // TEMPORARY: Exposing the exact DB error for debugging IT account login failure
-        $_SESSION['login_error'] = "Authentication error: " . $e->getMessage();
-        session_write_close();
+        setcookie('login_error', 'Database error: ' . $e->getMessage(), time() + 60, '/');
         header("Location: ../pages/login.php?error=db");
         exit();
     }

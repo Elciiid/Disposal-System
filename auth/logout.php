@@ -14,5 +14,10 @@ if (ini_get("session.use_cookies")) {
 
 // Finally, destroy the session.
 session_destroy();
+
+// Clear the auth token cookie (for Vercel serverless)
+setcookie('auth_token', '', time() - 3600, '/');
+setcookie('login_error', '', time() - 3600, '/');
+
 header("Location: ../pages/login.php");
 exit();

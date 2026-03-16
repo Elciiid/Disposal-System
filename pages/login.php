@@ -1,14 +1,24 @@
 <?php
 session_start();
-if (isset($_SESSION['user_id']) || isset($_SESSION['username'])) {
+
+// Check if already logged in (session OR cookie)
+if (isset($_SESSION['user_id']) || isset($_SESSION['username']) || !empty($_COOKIE['auth_token'])) {
     header("Location: dashboard.php");
     exit();
 }
 
-// Fallback: If session error is missing but URL error exists
-if (empty($_SESSION['login_error']) && !empty($_GET['error'])) {
-    if ($_GET['error'] === 'invalid') $_SESSION['login_error'] = "Invalid username or password.";
-    elseif ($_GET['error'] === 'db') $_SESSION['login_error'] = "Database connection error.";
+// Get error message from cookie (Vercel) or session (XAMPP)
+$loginError = '';
+if (!empty($_COOKIE['login_error'])) {
+    $loginError = $_COOKIE['login_error'];
+    // Clear the error cookie
+    setcookie('login_error', '', time() - 3600, '/');
+} elseif (isset($_SESSION['login_error'])) {
+    $loginError = $_SESSION['login_error'];
+    unset($_SESSION['login_error']);
+} elseif (!empty($_GET['error'])) {
+    if ($_GET['error'] === 'invalid') $loginError = "Invalid username or password.";
+    elseif ($_GET['error'] === 'db') $loginError = "Database connection error.";
 }
 ?>
 <!DOCTYPE html>
@@ -34,12 +44,11 @@ if (empty($_SESSION['login_error']) && !empty($_GET['error'])) {
             <p class="text-muted" style="font-size: 0.95rem;">Enter your credentials to access the portal</p>
         </div>
 
-        <?php if(isset($_SESSION['login_error'])): ?>
+        <?php if(!empty($loginError)): ?>
             <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert" style="border-radius: 16px; border: none; font-size: 0.9rem; font-weight: 500;">
                 <ion-icon name="warning-outline" style="font-size: 1.2rem;"></ion-icon>
-                <?= htmlspecialchars($_SESSION['login_error']) ?>
+                <?= htmlspecialchars($loginError) ?>
             </div>
-            <?php unset($_SESSION['login_error']); ?>
         <?php endif; ?>
 
         <form action="../auth/process_login.php" method="POST">

@@ -6,50 +6,64 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Gatekeeper: If not logged in, boot out to login page
-// (Exception: skip if we are in the middle of a login process/auto-fill check)
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['username'])) {
-    header("Location: ../pages/login.php");
-    exit();
+// ============================================================
+// COOKIE-BASED AUTH (Works on Vercel Serverless)
+// ============================================================
+// On Vercel, PHP sessions don't persist between requests because
+// each request runs in a new isolated container. Instead, we use
+// a cookie token to identify the user, then load their data
+// from the database on every request.
+
+$isAuthenticated = false;
+
+// Method 1: Check PHP Session (works on XAMPP)
+if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
+    $isAuthenticated = true;
 }
 
-// 2. Auto-fill session details if coming from another app (like the lrnph portal)
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['employee_id']) || !isset($_SESSION['role'])) {
-    require_once __DIR__ . '/../connection/database.php';
-    try {
+// Method 2: Check auth_token cookie (works on Vercel)
+if (!$isAuthenticated && !empty($_COOKIE['auth_token'])) {
+    $tokenData = json_decode(base64_decode($_COOKIE['auth_token']), true);
+    
+    if ($tokenData && isset($tokenData['user_id']) && isset($tokenData['username'])) {
+        // Load user from database using the token
+        require_once __DIR__ . '/../connection/database.php';
+        try {
             $stmt = $conn->prepare("
                 SELECT u.UserID as user_id, u.Username as username, u.FullName as full_name, r.RoleName as role_name,
                        u.RoleID as role_id, u.AreaID as area_id, u.PhaseID as phase_id, u.EmployeeID as employee_id
                 FROM wst_Users u
                 LEFT JOIN wst_Roles r ON u.RoleID = r.RoleID
-                WHERE u." . (isset($_SESSION['user_id']) ? "UserID" : "Username") . " = ?
+                WHERE u.UserID = ? AND u.Username = ?
             ");
-            $stmt->execute([isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SESSION['username']]);
-        
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([$tokenData['user_id'], $tokenData['username']]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            // Login successful
-            bootstrapSession($user, [
-                'PositionTitle' => $user['role_name'],
-                'FirstName'     => $user['full_name'],
-                'EmployeeID'    => $user['employee_id']
-            ]);
-            session_write_close();
-        } else {
-            // User ID in session but not found in DB? Clear and redirect.
-            session_destroy();
-            header("Location: ../pages/login.php?error=session_invalid");
-            exit();
+            if ($user) {
+                // Rebuild session from database
+                bootstrapSession($user, [
+                    'PositionTitle' => $user['role_name'],
+                    'FirstName'     => $user['full_name'],
+                    'EmployeeID'    => $user['employee_id']
+                ]);
+                $isAuthenticated = true;
+            }
+        } catch (PDOException $e) {
+            // DB error — can't authenticate
+            error_log("Auth cookie DB error: " . $e->getMessage());
         }
-    } catch (PDOException $e) {
-        // If DB is down, we can't safely proceed.
-        header("Location: ../pages/login.php?error=db_error");
-        exit();
     }
 }
 
-// Default "No Face" Avatar (SVG Data URI) - Gray User on Light Gray Background
+// If still not authenticated, redirect to login
+if (!$isAuthenticated) {
+    // Clear any stale cookies
+    setcookie('auth_token', '', time() - 3600, '/');
+    header("Location: ../pages/login.php");
+    exit();
+}
+
+// Default "No Face" Avatar (SVG Data URI)
 if (!defined('DEFAULT_AVATAR_URL')) {
     define('DEFAULT_AVATAR_URL', "data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2394a3b8%22 style=%22background:%23e2e8f0; border-radius: 50%;%22%3e%3cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3e%3c/svg%3e");
 }
