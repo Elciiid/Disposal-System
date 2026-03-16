@@ -15,8 +15,8 @@ $pendingLogs = $approvalCtx['pendingLogs'];
 $latestPendingLogs = $approvalCtx['latestPendingLogs'];
 
 try {
-    // Daily date condition for initial load
-    $dailyCond = "CAST(LogDate AS DATE) = CAST(GETDATE() AS DATE)";
+    // Daily date condition for initial load (PostgreSQL style)
+    $dailyCond = "LogDate::date = CURRENT_DATE";
 
     // Initial load: daily filtered stats
     $filteredStats = getWasteStatsFiltered($conn, 'daily');

@@ -1,26 +1,31 @@
 <?php
 /**
- * Database Configuration Template
+ * Database Configuration Template - PostgreSQL (Neon)
  * Rename this file to database.php and fill in your actual credentials.
  */
 date_default_timezone_set('Asia/Manila');
 
-$auth_server_name = "YOUR_SERVER_IP";
-$database_name    = "YOUR_DATABASE_NAME";
-$username         = "YOUR_USERNAME";
-$password         = "YOUR_PASSWORD";
+// In production (Vercel), these will be picked up from Environment Variables.
+// Locally, you can fill these in for testing.
+$host     = getenv('DB_HOST')     ?: "YOUR_NEON_HOST";
+$port     = getenv('DB_PORT')     ?: "5432";
+$database = getenv('DB_DATABASE') ?: "neondb";
+$user     = getenv('DB_USER')     ?: "YOUR_USER";
+$password = getenv('DB_PASSWORD') ?: "YOUR_PASSWORD";
 
 try {
-    $conn = new PDO("sqlsrv:server=$auth_server_name;Database=$database_name", $username, $password);
+    $dsn = "pgsql:host=$host;port=$port;dbname=$database;sslmode=require";
+    $conn = new PDO($dsn, $user, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch(PDOException $e) {
     error_log("Database Connection Error: " . $e->getMessage());
     if (session_status() === PHP_SESSION_NONE) session_start();
-    $_SESSION['error_msg'] = "Database connection failed. Please try again later.";
+    $_SESSION['error_msg'] = "Database connection failed.";
     
     die("<div style=\"font-family:sans-serif; padding:50px; text-align:center;\">
             <h2 style=\"color:#e11d48;\">System Unavailable</h2>
-            <p>We're having trouble connecting to the database. Please contact IT support if this persists.</p>
+            <p>Connection failed. Check your database credentials.</p>
             <button onclick=\"location.reload()\" style=\"padding:10px 20px; background:#181a1f; color:#fff; border:none; border-radius:5px; cursor:pointer;\">Retry</button>
          </div>");
 }

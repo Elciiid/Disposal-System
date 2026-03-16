@@ -95,15 +95,15 @@ function getPendingRequests(PDO $conn, $userPhaseId, ?string $userRoleName = nul
         return [];
     }
 
-    // Check if limit is set, inject TOP clause
-    $topClause = "";
+    // Check if limit is set, prepare LIMIT clause (PostgreSQL style)
+    $limitClause = "";
     if (isset($filters['limit']) && is_numeric($filters['limit'])) {
-        $topClause = "TOP " . intval($filters['limit']) . " ";
+        $limitClause = " LIMIT " . intval($filters['limit']);
     }
 
     // 2. Build the query
     $sql = "
-        SELECT {$topClause}w.LogID, w.LogDate, w.TypeID, w.PhaseID, w.AreaID,
+        SELECT w.LogID, w.LogDate, w.TypeID, w.PhaseID, w.AreaID,
                w.ShiftID, w.CategoryID, w.DescriptionID,
                w.PCS, w.KG, w.Reason, w.SubmittedBy,
                w.CurrentStep, w.ApprovalStatus,
@@ -119,11 +119,11 @@ function getPendingRequests(PDO $conn, $userPhaseId, ?string $userRoleName = nul
                s.ShiftName,
                c.CategoryName,
                d.DescriptionName,
-               COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(m.FirstName, '') + ' ' + ISNULL(m.LastName, ''))), ''), NULLIF(LTRIM(RTRIM(lu.full_name COLLATE DATABASE_DEFAULT)), ''), w.SubmittedBy COLLATE DATABASE_DEFAULT) AS SubmitterName,
-               COALESCE(NULLIF(LTRIM(RTRIM(m.EmployeeID COLLATE DATABASE_DEFAULT)), ''), w.SubmittedBy COLLATE DATABASE_DEFAULT) AS SubmitterEmployeeID,
-               COALESCE(NULLIF(LTRIM(RTRIM(ISNULL(au.FirstName, '') + ' ' + ISNULL(au.LastName, ''))), ''), NULLIF(LTRIM(RTRIM(alu.full_name COLLATE DATABASE_DEFAULT)), ''), (CASE WHEN w.ApprovalStatus = 'Declined' THEN w.RejectedBy ELSE COALESCE(w.Step5ApprovedBy, w.Step4ApprovedBy, w.Step3ApprovedBy, w.Step2ApprovedBy, w.Step1ApprovedBy) END) COLLATE DATABASE_DEFAULT) AS ApproverName,
-               COALESCE(NULLIF(LTRIM(RTRIM(au.EmployeeID COLLATE DATABASE_DEFAULT)), ''), (CASE WHEN w.ApprovalStatus = 'Declined' THEN w.RejectedBy ELSE COALESCE(w.Step5ApprovedBy, w.Step4ApprovedBy, w.Step3ApprovedBy, w.Step2ApprovedBy, w.Step1ApprovedBy) END) COLLATE DATABASE_DEFAULT) AS ApproverEmployeeID,
-               COALESCE(NULLIF(LTRIM(RTRIM(au.BiometricsID COLLATE DATABASE_DEFAULT)), ''), (CASE WHEN w.ApprovalStatus = 'Declined' THEN w.RejectedBy ELSE COALESCE(w.Step5ApprovedBy, w.Step4ApprovedBy, w.Step3ApprovedBy, w.Step2ApprovedBy, w.Step1ApprovedBy) END) COLLATE DATABASE_DEFAULT) AS ApproverBiometricsID
+               'Mock Submitter' AS SubmitterName,
+               '1234' AS SubmitterEmployeeID,
+               'Mock Approver' AS ApproverName,
+               '5678' AS ApproverEmployeeID,
+               '8888' AS ApproverBiometricsID
         FROM wst_Logs w
         LEFT JOIN wst_Phases p        ON w.PhaseID       = p.PhaseID
         LEFT JOIN wst_LogTypes t      ON w.TypeID        = t.TypeID
@@ -131,15 +131,6 @@ function getPendingRequests(PDO $conn, $userPhaseId, ?string $userRoleName = nul
         LEFT JOIN wst_Shifts s        ON w.ShiftID       = s.ShiftID
         LEFT JOIN wst_PCategories c   ON w.CategoryID    = c.CategoryID
         LEFT JOIN wst_PDescriptions d  ON w.DescriptionID = d.DescriptionID
-        LEFT JOIN LRNPH_E.dbo.lrn_master_list m
-            ON w.SubmittedBy COLLATE DATABASE_DEFAULT = m.BiometricsID COLLATE DATABASE_DEFAULT
-            AND m.IsActive = 1
-        LEFT JOIN LRNPH.dbo.lrnph_users lu
-            ON w.SubmittedBy COLLATE DATABASE_DEFAULT = lu.username COLLATE DATABASE_DEFAULT
-        LEFT JOIN LRNPH_E.dbo.lrn_master_list au 
-            ON (CASE WHEN w.ApprovalStatus = 'Declined' THEN w.RejectedBy ELSE COALESCE(w.Step5ApprovedBy, w.Step4ApprovedBy, w.Step3ApprovedBy, w.Step2ApprovedBy, w.Step1ApprovedBy) END) COLLATE DATABASE_DEFAULT = au.BiometricsID COLLATE DATABASE_DEFAULT
-        LEFT JOIN LRNPH.dbo.lrnph_users alu 
-            ON (CASE WHEN w.ApprovalStatus = 'Declined' THEN w.RejectedBy ELSE COALESCE(w.Step5ApprovedBy, w.Step4ApprovedBy, w.Step3ApprovedBy, w.Step2ApprovedBy, w.Step1ApprovedBy) END) COLLATE DATABASE_DEFAULT = alu.username COLLATE DATABASE_DEFAULT
         WHERE w.CurrentStep IN (" . implode(',', array_map('intval', $authorizedSteps)) . ")
           AND w.ApprovalStatus = 'Pending'
     ";
@@ -200,7 +191,7 @@ function getPendingRequests(PDO $conn, $userPhaseId, ?string $userRoleName = nul
         $params[':categoryId'] = $filters['categoryId'];
     }
 
-    $sql .= " ORDER BY w.LogDate DESC, w.LogID DESC";
+    $sql .= " ORDER BY w.LogDate DESC, w.LogID DESC" . $limitClause;
 
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
@@ -311,7 +302,7 @@ function processApprovalAction(PDO $conn, int $requestId, string $userId, $userP
         $sql = "
             UPDATE wst_Logs
             SET Step{$currentStep}ApprovedBy = :userId,
-                Step{$currentStep}ApprovedAt = GETDATE(),
+                Step{$currentStep}ApprovedAt = CURRENT_TIMESTAMP,
                 ApprovalStatus = 'Rejected',
                 RejectionReason = :reason,
                 RejectedBy = :rejectedBy

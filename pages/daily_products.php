@@ -24,7 +24,7 @@ $sql = "SELECT
         LEFT JOIN wst_PCategories c ON w.CategoryID = c.CategoryID
         LEFT JOIN wst_LogTypes t ON w.TypeID = t.TypeID
         LEFT JOIN wst_Areas a ON w.AreaID = a.AreaID
-        WHERE CAST(w.LogDate AS DATE) = CAST(GETDATE() AS DATE)
+        WHERE w.LogDate::date = CURRENT_DATE
         GROUP BY c.CategoryName, t.TypeName, a.AreaName
         ORDER BY c.CategoryName ASC";
 

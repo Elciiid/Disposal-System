@@ -19,13 +19,14 @@ if (!in_array($scale, ['daily', 'weekly', 'monthly'])) {
 }
 
 try {
-    // Build date condition for SQL
+    // Build date condition for SQL (PostgreSQL compatible)
     if ($scale === 'daily') {
-        $dateCondition = "CAST(LogDate AS DATE) = CAST(GETDATE() AS DATE)";
+        $dateCondition = "w.LogDate::date = CURRENT_DATE";
     } elseif ($scale === 'weekly') {
-        $dateCondition = "CAST(LogDate AS DATE) >= DATEADD(day, -DATEPART(dw, GETDATE()) + 1, CAST(GETDATE() AS DATE)) AND CAST(LogDate AS DATE) <= CAST(GETDATE() AS DATE)";
+        // Start of week (Monday) to today
+        $dateCondition = "w.LogDate::date >= date_trunc('week', CURRENT_DATE)::date AND w.LogDate::date <= CURRENT_DATE";
     } else {
-        $dateCondition = "YEAR(LogDate) = YEAR(GETDATE()) AND MONTH(LogDate) = MONTH(GETDATE())";
+        $dateCondition = "EXTRACT(YEAR FROM w.LogDate) = EXTRACT(YEAR FROM CURRENT_DATE) AND EXTRACT(MONTH FROM w.LogDate) = EXTRACT(MONTH FROM CURRENT_DATE)";
     }
 
     // 1. Waste Processed stats

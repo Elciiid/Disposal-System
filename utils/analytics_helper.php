@@ -8,11 +8,12 @@
  * Get top 3 distribution of waste by category.
  */
 function getWasteDistributionByCategory($conn) {
-    $sql = "SELECT TOP 3 c.CategoryName, COUNT(w.LogID) as log_count, SUM(w.KG) as total_kg, SUM(w.PCS) as total_pcs
+    $sql = "SELECT c.CategoryName, COUNT(w.LogID) as log_count, SUM(w.KG) as total_kg, SUM(w.PCS) as total_pcs
             FROM wst_PCategories c
             LEFT JOIN wst_Logs w ON c.CategoryID = w.CategoryID
             GROUP BY c.CategoryName
-            ORDER BY log_count DESC";
+            ORDER BY log_count DESC
+            LIMIT 3";
     try {
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -48,13 +49,13 @@ function getMonthlyWasteTrends($conn) {
     // Fetch aggregated data for the current year
     $yearStartStr = "$currentYear-01-01";
     $sql = "SELECT 
-                FORMAT(w.LogDate, 'yyyy-MM') as month_key,
+                TO_CHAR(w.LogDate, 'YYYY-MM') as month_key,
                 SUM(w.KG) as total_kg,
                 COUNT(CASE WHEN t.TypeName LIKE '%Other%' THEN 1 END) as others_count
             FROM wst_Logs w
             JOIN wst_LogTypes t ON w.TypeID = t.TypeID
-            WHERE CAST(w.LogDate AS DATE) >= :year_start
-            GROUP BY FORMAT(w.LogDate, 'yyyy-MM')";
+            WHERE w.LogDate::date >= :year_start
+            GROUP BY TO_CHAR(w.LogDate, 'YYYY-MM')";
             
     try {
         $stmt = $conn->prepare($sql);
@@ -106,15 +107,15 @@ function getDailyWasteTrends($conn) {
         $currentDate->modify('+1 day');
     }
     
-    // Fetch aggregated data for the current week from SQL Server
+    // Fetch aggregated data for the current week from PostgreSQL
     $sql = "SELECT 
-                CAST(w.LogDate AS DATE) as date_val,
+                w.LogDate::date as date_val,
                 SUM(w.KG) as total_kg,
                 COUNT(CASE WHEN t.TypeName LIKE '%Other%' THEN 1 END) as others_count
             FROM wst_Logs w
             JOIN wst_LogTypes t ON w.TypeID = t.TypeID
             WHERE w.LogDate >= :start_of_week
-            GROUP BY CAST(w.LogDate AS DATE)";
+            GROUP BY w.LogDate::date";
             
     try {
         $stmt = $conn->prepare($sql);
@@ -165,13 +166,13 @@ function getWeeklyWasteTrends($conn) {
     // Fetch aggregated daily data for the current month
     $monthStartStr = $today->format('Y-m-01');
     $sql = "SELECT 
-                CAST(w.LogDate AS DATE) as date_val,
+                w.LogDate::date as date_val,
                 SUM(w.KG) as total_kg,
                 COUNT(CASE WHEN t.TypeName LIKE '%Other%' THEN 1 END) as others_count
             FROM wst_Logs w
             JOIN wst_LogTypes t ON w.TypeID = t.TypeID
-            WHERE CAST(w.LogDate AS DATE) >= :month_start
-            GROUP BY CAST(w.LogDate AS DATE)";
+            WHERE w.LogDate::date >= :month_start
+            GROUP BY w.LogDate::date";
             
     try {
         $stmt = $conn->prepare($sql);
@@ -209,13 +210,13 @@ function getWasteStatsFiltered($conn, $timeScale = 'daily') {
     try {
         // Build the date condition based on time scale
         if ($timeScale === 'daily') {
-            $dateCondition = "CAST(LogDate AS DATE) = CAST(GETDATE() AS DATE)";
+            $dateCondition = "LogDate::date = CURRENT_DATE";
         } elseif ($timeScale === 'weekly') {
-            // Current week (Sunday to Saturday)
-            $dateCondition = "CAST(LogDate AS DATE) >= DATEADD(day, -DATEPART(dw, GETDATE()) + 1, CAST(GETDATE() AS DATE)) AND CAST(LogDate AS DATE) <= CAST(GETDATE() AS DATE)";
+            // Monday of current week to today
+            $dateCondition = "LogDate::date >= date_trunc('week', CURRENT_DATE)::date AND LogDate::date <= CURRENT_DATE";
         } else {
             // Current month
-            $dateCondition = "YEAR(LogDate) = YEAR(GETDATE()) AND MONTH(LogDate) = MONTH(GETDATE())";
+            $dateCondition = "EXTRACT(YEAR FROM LogDate) = EXTRACT(YEAR FROM CURRENT_DATE) AND EXTRACT(MONTH FROM LogDate) = EXTRACT(MONTH FROM CURRENT_DATE)";
         }
 
         // Total filtered logs
@@ -261,7 +262,7 @@ function getWasteStats($conn) {
         $totalLogsResult = $conn->query("SELECT COUNT(*) FROM wst_Logs")->fetchColumn();
         
         // Logs today
-        $todayLogsResult = $conn->query("SELECT COUNT(*) FROM wst_Logs WHERE LogDate = CAST(GETDATE() AS DATE)")->fetchColumn();
+        $todayLogsResult = $conn->query("SELECT COUNT(*) FROM wst_Logs WHERE LogDate::date = CURRENT_DATE")->fetchColumn();
         
         // Weights
         $stmt = $conn->query("SELECT SUM(KG) as total_kg, SUM(PCS) as total_pcs FROM wst_Logs");
@@ -316,7 +317,7 @@ function getTVBoardMetrics($conn, $phaseId) {
                          FROM wst_Logs w
                          JOIN wst_PCategories c ON w.CategoryID = c.CategoryID
                          WHERE w.PhaseID = :phaseId
-                         AND CAST(w.LogDate AS DATE) = CAST(GETDATE() AS DATE)";
+                         AND w.LogDate::date = CURRENT_DATE";
         $stmtCats = $conn->prepare($sqlTodayCats);
         $stmtCats->execute([':phaseId' => $phaseId]);
         $activeCats = $stmtCats->fetchAll(PDO::FETCH_ASSOC);
@@ -364,7 +365,7 @@ function getTVBoardMetrics($conn, $phaseId) {
                                  WHERE w.CategoryID = :catId 
                                  AND w.PhaseID = :phaseId
                                  AND t.TypeName LIKE :typePattern
-                                 AND CAST(w.LogDate AS DATE) = CAST(GETDATE() AS DATE)";
+                                 AND w.LogDate::date = CURRENT_DATE";
                     
                     $stmt = $conn->prepare($sqlToday);
                     $stmt->execute([
@@ -380,7 +381,7 @@ function getTVBoardMetrics($conn, $phaseId) {
                                      WHERE w.CategoryID = :catId 
                                      AND w.PhaseID = :phaseId
                                      AND t.TypeName LIKE :typePattern
-                                     AND CAST(w.LogDate AS DATE) = CAST(DATEADD(day, -1, GETDATE()) AS DATE)";
+                                     AND w.LogDate::date = CURRENT_DATE - INTERVAL '1 day'";
                     
                     $stmt = $conn->prepare($sqlYesterday);
                     $stmt->execute([
