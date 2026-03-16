@@ -25,6 +25,8 @@ foreach($files as $file) {
 echo "</pre>";
 
 $connectionFile = __DIR__ . '/connection/database.php';
+
+if (!file_exists($connectionFile)) {
     echo "<p style='color: red;'>❌ Error: Connection file not found at: $connectionFile</p>";
     exit();
 }
