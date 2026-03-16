@@ -1,28 +1,11 @@
 {
-  "version": 2,
-  "name": "disposal-system",
-  "builds": [
-    {
-      "src": "index.php",
-      "use": "vercel-community/php"
-    },
-    {
-      "src": "pages/*.php",
-      "use": "vercel-community/php"
-    },
-    {
-      "src": "auth/*.php",
-      "use": "vercel-community/php"
-    },
-    {
-      "src": "api/*.php",
-      "use": "vercel-community/php"
-    },
-    {
-      "src": "test_connection.php",
-      "use": "vercel-community/php"
-    }
-  ],
+  "functions": {
+    "api/*.php": { "runtime": "vercel-php@0.6.0" },
+    "pages/*.php": { "runtime": "vercel-php@0.6.0" },
+    "auth/*.php": { "runtime": "vercel-php@0.6.0" },
+    "index.php": { "runtime": "vercel-php@0.6.0" },
+    "test_connection.php": { "runtime": "vercel-php@0.6.0" }
+  },
   "routes": [
     {
       "src": "/(assets|styles)/(.*)",
@@ -33,12 +16,16 @@
       "dest": "/api/$1.php"
     },
     {
+      "src": "/auth/(.*)",
+      "dest": "/auth/$1.php"
+    },
+    {
       "src": "/pages/(.*)",
       "dest": "/pages/$1.php"
     },
     {
       "src": "/(.*)",
-      "dest": "/pages/index.php"
+      "dest": "/index.php"
     }
   ]
 }
