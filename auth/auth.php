@@ -17,36 +17,24 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['username'])) {
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['employee_id']) || !isset($_SESSION['role'])) {
     require_once __DIR__ . '/../connection/database.php';
     try {
-        if (isset($_SESSION['user_id'])) {
             $stmt = $conn->prepare("
-                SELECT u.user_id, u.username, u.full_name, u.role,
-                       w.RoleID, r.RoleName, w.AreaID, w.PhaseID
-                FROM LRNPH.dbo.lrnph_users u
-                LEFT JOIN wst_Users w ON u.username COLLATE DATABASE_DEFAULT = w.Username COLLATE DATABASE_DEFAULT
-                LEFT JOIN wst_Roles r ON w.RoleID = r.RoleID
-                WHERE u.user_id = ?
+                SELECT u.UserID as user_id, u.Username as username, u.FullName as full_name, r.RoleName as role,
+                       u.RoleID, r.RoleName, u.AreaID, u.PhaseID, u.EmployeeID
+                FROM wst_Users u
+                LEFT JOIN wst_Roles r ON u.RoleID = r.RoleID
+                WHERE u." . (isset($_SESSION['user_id']) ? "UserID" : "Username") . " = ?
             ");
-            $stmt->execute([$_SESSION['user_id']]);
-        } else {
-            $stmt = $conn->prepare("
-                SELECT u.user_id, u.username, u.full_name, u.role,
-                       w.RoleID, r.RoleName, w.AreaID, w.PhaseID
-                FROM LRNPH.dbo.lrnph_users u
-                LEFT JOIN wst_Users w ON u.username COLLATE DATABASE_DEFAULT = w.Username COLLATE DATABASE_DEFAULT
-                LEFT JOIN wst_Roles r ON w.RoleID = r.RoleID
-                WHERE u.username = ?
-            ");
-            $stmt->execute([$_SESSION['username']]);
-        }
+            $stmt->execute([isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SESSION['username']]);
         
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            $stmtMaster = $conn->prepare("SELECT [FirstName], [LastName], [PositionTitle], [EmployeeID], [Department] FROM LRNPH_E.dbo.lrn_master_list WHERE BiometricsID = ? AND IsActive = 1");
-            $stmtMaster->execute([$user['username']]);
-            $masterInfo = $stmtMaster->fetch(PDO::FETCH_ASSOC);
-            // Login successful — use shared bootstrap (DRY)
-            bootstrapSession($user, $masterInfo);
+            // Login successful
+            bootstrapSession($user, [
+                'PositionTitle' => $user['role'],
+                'FirstName'     => $user['full_name'],
+                'EmployeeID'    => $user['employee_id']
+            ]);
         } else {
             // User ID in session but not found in DB? Clear and redirect.
             session_destroy();

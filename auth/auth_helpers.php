@@ -92,22 +92,9 @@ function hasSettingsAccess($conn, $username, $userRoleName = null) {
     // 1. Check for explicit 'access_settings' permission
     if (hasPermission($conn, 'access_settings')) return true;
     
-    // 2. Fallback check for IT Department (Legacy support or global admin)
-    $sql = "
-        SELECT 1 
-        FROM LRNPH_E.dbo.lr_master_list 
-        WHERE BiometricsID = :username 
-        AND IsActive = 1 
-        AND Department = 'Information Technology Department - LRN'
-    ";
-
-    try {
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(['username' => $username]);
-        return (bool)$stmt->fetchColumn();
-    } catch (PDOException $e) {
-        return false;
-    }
+    // 2. Fallback check for Admin Role
+    $roleName = $userRoleName ?? ($_SESSION['wst_role_name'] ?? '');
+    return ($roleName === 'Admin');
 }
 
 ?>

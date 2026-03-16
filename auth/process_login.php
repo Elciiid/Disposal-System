@@ -13,27 +13,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Query the LRNPH database but join it with our local wst_Users to grab Phase/Area/Role
         $stmt = $conn->prepare("
-            SELECT u.user_id, u.username, u.password, u.full_name, u.role,
-                   w.RoleID, r.RoleName, w.AreaID, w.PhaseID
-            FROM LRNPH.dbo.lrnph_users u
-            LEFT JOIN wst_Users w ON u.username COLLATE DATABASE_DEFAULT = w.Username COLLATE DATABASE_DEFAULT
-            LEFT JOIN wst_Roles r ON w.RoleID = r.RoleID
-            WHERE u.username = ?
+            SELECT u.UserID as user_id, u.Username as username, u.Password as password, u.FullName as full_name, r.RoleName as role,
+                   u.RoleID, r.RoleName as wst_role_name, u.AreaID, u.PhaseID, u.EmployeeID
+            FROM wst_Users u
+            LEFT JOIN wst_Roles r ON u.RoleID = r.RoleID
+            WHERE u.Username = ?
         ");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            // Fetch extra details from the master list using the username (BiometricsID)
-            $stmtMaster = $conn->prepare("SELECT [FirstName], [LastName], [PositionTitle], [EmployeeID], [Department] FROM LRNPH_E.dbo.lrn_master_list WHERE BiometricsID = ? AND IsActive = 1");
-            $stmtMaster->execute([$user['username']]);
-            $masterInfo = $stmtMaster->fetch(PDO::FETCH_ASSOC);
-            
             // Login successful — use shared bootstrap (DRY)
             require_once __DIR__ . '/auth_helpers.php';
-            bootstrapSession($user, $masterInfo);
+            bootstrapSession($user, [
+                'PositionTitle' => $user['role'],
+                'FirstName'     => $user['full_name'],
+                'EmployeeID'    => $user['employee_id']
+            ]);
             
             header("Location: ../pages/dashboard.php");
             exit();
