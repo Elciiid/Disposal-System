@@ -43,9 +43,7 @@ try {
     
     die("<div style=\"font-family:sans-serif; padding:50px; text-align:center;\">
             <h2 style=\"color:#e11d48;\">System Unavailable</h2>
-            <p>Connection failed: " . htmlspecialchars($e->getMessage()) . "</p>
-            <p style=\"color: #666; font-size: 0.9em;\">If you are on XAMPP, ensure <code>extension=pdo_pgsql</code> is enabled in your php.ini.</p>
-            <button onclick=\"location.reload()\" style=\"padding:10px 20px; background:#181a1f; color:#fff; border:none; border-radius:5px; cursor:pointer;\">Retry</button>
+            <p>We are experiencing technical difficulties. Please try again later.</p>
          </div>");
 }
 ?>
