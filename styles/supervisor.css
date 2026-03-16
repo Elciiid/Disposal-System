@@ -1,0 +1,798 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg-dark: #202227;
+    --bg-light: #eff1f5;
+    --card-bg: #ffffff;
+    --text-main: #181a1f;
+    --text-muted: #8b929e;
+    --accent-yellow: #d1f43a;
+    --accent-green: #a3e635;
+    --accent-orange: #fb923c;
+    --brand-color: #d1f43a;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    scrollbar-gutter: stable;
+}
+
+/* Layout */
+.dashboard-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--bg-dark);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Sidebar (Left Panel) */
+.sidebar {
+    background-color: transparent;
+    /* Wrapper handles background */
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 20px;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 50px;
+    padding-left: 10px;
+}
+
+.brand-icon {
+    color: var(--accent-yellow);
+    font-size: 1.8rem;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    border-radius: 30px;
+    color: #8b929e;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    color: white;
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent-yellow);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link.active ion-icon {
+    color: var(--accent-yellow);
+}
+
+.nav-badge {
+    background-color: var(--accent-yellow);
+    color: var(--text-main);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: auto;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.sidebar-footer .nav-link {
+    color: #8b929e;
+    font-weight: 500;
+}
+
+.sidebar-footer .nav-link:hover {
+    color: white;
+}
+
+.sidebar-logo {
+    margin-top: auto;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    max-width: 180px;
+    width: 80%;
+    opacity: 0.9;
+    pointer-events: none;
+    background: transparent !important;
+    /* Force transparent background */
+    mix-blend-mode: screen;
+    /* Blend with dark background if it has a black/dark bg */
+}
+
+/* Dashboard Layout Specs */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 20px;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.dark-card {
+    background-color: #202227;
+    color: white;
+}
+
+/* Dashboard Circle Visuals */
+.dash-circles-wrap {
+    min-height: 280px;
+    flex-grow: 1;
+}
+
+.dash-circle-pcs {
+    width: 230px;
+    height: 230px;
+    background-color: #c4b5fd;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-85%);
+    z-index: 1;
+}
+
+.dash-circle-kg {
+    width: 190px;
+    height: 190px;
+    background-color: #202227;
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    transform: translateX(-5%);
+    z-index: 2;
+}
+
+.dash-circle-transf {
+    width: 130px;
+    height: 130px;
+    background-color: var(--accent-yellow);
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.dash-circle-val {
+    font-size: 3rem;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+.dash-circle-kg .dash-circle-val {
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+}
+
+.dash-circle-transf .dash-circle-val {
+    font-size: 2rem;
+    letter-spacing: -1px;
+}
+
+.dash-circle-label {
+    font-size: 0.9rem;
+}
+
+/* Dashboard Stat Row */
+.dash-stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Dashboard Chart */
+.dash-chart-wrap {
+    min-height: 140px;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1;
+}
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    background-color: rgba(239, 241, 245, 0.88);
+    /* Slightly transparent */
+    backdrop-filter: blur(10px);
+    /* Glass effect */
+    border-radius: 30px;
+    margin: 15px 15px 15px 0;
+    /* Creates the inset look */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 40px;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin: 0 0 5px 0;
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Cards & Table */
+.data-card {
+    background-color: var(--card-bg);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.table {
+    margin-bottom: 0;
+    min-width: 1000px;
+}
+
+.table thead th {
+    border-bottom: 1px solid #e2e8f0;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 1rem 0.5rem;
+}
+
+.table tbody td {
+    padding: 1rem 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.table tbody tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.5em 1em;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    text-align: center;
+    min-width: 90px;
+}
+
+.badge-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-approved {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-declined {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Action Buttons */
+.btn-action {
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    margin-right: 0.3rem;
+    border: none;
+}
+
+.btn-approve {
+    background-color: #f1f3f7;
+    color: #064e3b;
+}
+
+.btn-approve:hover {
+    background-color: var(--accent-green);
+}
+
+.btn-decline {
+    background-color: #f1f3f7;
+    color: #7c2d12;
+}
+
+.btn-decline:hover {
+    background-color: var(--accent-orange);
+}
+
+/* Scrollbar Customization for main-content and data-card */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ========================================
+   MOBILE SIDEBAR TOGGLE
+   ======================================== */
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 1100;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--bg-dark);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.4rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+    background: #2a2c32;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    transition: opacity 0.3s;
+}
+
+/* ========================================
+   DESKTOP / LAPTOP (min-width: 1201px)
+   ======================================== */
+@media (min-width: 1201px) {
+    /* Preserve existing desktop styles if any were specific to >1200 */
+}
+
+/* ========================================
+   TABLETS (max-width: 1200px) — sidebar collapses
+   ======================================== */
+@media (max-width: 1200px) {
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        width: 260px;
+        padding: 30px 20px;
+        background-color: var(--bg-dark);
+        z-index: 1050;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 5px 0 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar.open~.sidebar-overlay {
+        display: block;
+    }
+
+    .dashboard-wrapper {
+        flex-direction: column;
+    }
+
+    .main-content {
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+        min-height: 100vh;
+        height: auto !important;
+        max-height: none !important;
+        padding: 20px;
+        padding-top: 70px;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+    }
+
+    .page-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .top-header {
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Dashboard: stack everything vertically */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+        height: auto !important;
+        min-height: auto !important;
+        flex-grow: 0 !important;
+    }
+
+    .data-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .data-card[style*="padding: 40px"] {
+        padding: 18px !important;
+        border-radius: 20px !important;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+    }
+
+    /* Tables — keep readable on tablets */
+    .table {
+        min-width: 800px;
+    }
+
+    .table thead th {
+        font-size: 0.82rem;
+        padding: 0.85rem 0.6rem;
+    }
+
+    .table tbody td {
+        font-size: 0.95rem;
+        padding: 0.85rem 0.6rem;
+    }
+
+    .status-badge {
+        font-size: 0.78rem;
+        min-width: 80px;
+    }
+
+    .btn-action {
+        padding: 0.4rem 1rem;
+        font-size: 0.78rem;
+    }
+
+    /* Dashboard circles - scale down */
+    .dash-circles-wrap {
+        min-height: 200px;
+    }
+
+    .dash-circle-pcs {
+        width: 160px;
+        height: 160px;
+        transform: translateX(-85%);
+    }
+
+    .dash-circle-kg {
+        width: 140px;
+        height: 140px;
+        transform: translateX(-15%);
+        top: 25px;
+    }
+
+    .dash-circle-transf {
+        width: 100px;
+        height: 100px;
+    }
+
+    .dash-circle-val {
+        font-size: 2.2rem !important;
+    }
+
+    .dash-circle-kg .dash-circle-val {
+        font-size: 1.8rem !important;
+    }
+
+    .dash-circle-transf .dash-circle-val {
+        font-size: 1.5rem !important;
+    }
+
+    .dash-circle-label {
+        font-size: 0.75rem;
+    }
+
+    /* Dashboard stat row - stack on tablet */
+    .dash-stat-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    /* Chart - use static height on mobile */
+    .dash-chart-wrap {
+        min-height: 180px;
+        position: relative !important;
+    }
+}
+
+/* ========================================
+   PHONES (max-width: 768px)
+   ======================================== */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 15px;
+        padding-top: 65px;
+    }
+
+    .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .top-header>.d-flex {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .top-header .position-relative {
+        max-width: 100% !important;
+    }
+
+    .page-title {
+        font-size: 1.4rem;
+    }
+
+    .data-card {
+        padding: 15px;
+        border-radius: 16px;
+    }
+
+    .data-card[style*="padding: 40px"] {
+        padding: 15px !important;
+        border-radius: 16px !important;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+    }
+
+    .btn-action {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.75rem;
+    }
+
+    /* Tables — keep text readable on phones */
+    .table {
+        min-width: 700px;
+    }
+
+    .table thead th {
+        font-size: 0.8rem;
+        padding: 0.8rem 0.5rem;
+    }
+
+    .table tbody td {
+        font-size: 0.92rem;
+        padding: 0.8rem 0.5rem;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        min-width: 75px;
+        padding: 0.4em 0.7em;
+    }
+
+    /* Dashboard circles - smaller on phones */
+    .dash-circles-wrap {
+        min-height: 160px;
+    }
+
+    .dash-circle-pcs {
+        width: 130px;
+        height: 130px;
+        transform: translateX(-85%);
+    }
+
+    .dash-circle-kg {
+        width: 110px;
+        height: 110px;
+        transform: translateX(-15%);
+        top: 15px;
+    }
+
+    .dash-circle-transf {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+    }
+
+    .dash-circle-val {
+        font-size: 1.6rem !important;
+    }
+
+    .dash-circle-kg .dash-circle-val {
+        font-size: 1.4rem !important;
+    }
+
+    .dash-circle-transf .dash-circle-val {
+        font-size: 1.2rem !important;
+    }
+
+    .dash-circle-label {
+        font-size: 0.65rem;
+    }
+
+    /* Dashboard stat row - stack */
+    .dash-stat-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Chart */
+    .dash-chart-wrap {
+        min-height: 160px;
+    }
+}
+
+/* ========================================
+   SMALL PHONES (max-width: 480px)
+   ======================================== */
+@media (max-width: 480px) {
+    .sidebar-toggle {
+        top: 12px;
+        left: 12px;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1.2rem;
+    }
+
+    .main-content {
+        padding: 10px;
+        padding-top: 58px;
+    }
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+
+    .page-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .data-card {
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+
+    .top-header .dropdown-menu {
+        min-width: 280px !important;
+    }
+}
+
+/* Filter Dropdown Optimization */
+.filter-scroll-container {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+    padding: 0 15px;
+    /* Extra padding to accommodate row margins */
+    margin-bottom: 20px;
+}
+
+.filter-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filter-scroll-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.dropdown-menu.filter-dropdown {
+    min-width: 350px;
+    max-width: 95vw;
+    border-radius: 20px;
+    padding: 1.5rem !important;
+    border: none !important;
+    overflow-x: hidden;
+    /* Secondary safeguard */
+}
+
+/* Static CSV Button (no hover effect) */
+.csv-btn-static:hover,
+.csv-btn-static:active,
+.csv-btn-static:focus {
+    background-color: white !important;
+    color: #181a1f !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    transform: none !important;
+}
+
+
+@media (max-height: 750px) {
+    .filter-scroll-container {
+        max-height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dropdown-menu.filter-dropdown {
+        min-width: 290px !important;
+        padding: 1.2rem !important;
+    }
+
+    .filter-scroll-container {
+        max-height: 350px;
+    }
+}

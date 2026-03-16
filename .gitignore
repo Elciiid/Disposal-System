@@ -1,0 +1,14 @@
+# Database Configuration
+# Node: connection/
+database.php
+
+# Temporary files
+tmp/
+*.log
+
+# Windows Thumbnails
+Thumbs.db
+
+# VS Code / IDE settings
+.vscode/
+.idea/
