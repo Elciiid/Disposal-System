@@ -16,13 +16,27 @@ echo "<li><strong>Current Dir (__DIR__):</strong> " . __DIR__ . "</li>";
 echo "<li><strong>Working Dir (getcwd):</strong> " . getcwd() . "</li>";
 echo "</ul>";
 
-echo "<h4>Directory Listing:</h4><pre>";
+echo "<h4>Directory Listing (Root):</h4><pre>";
 $files = scandir(__DIR__);
 foreach($files as $file) {
+    if ($file === '.' || $file === '..') continue;
     $type = is_dir(__DIR__ . '/' . $file) ? '[DIR]' : '[FILE]';
     echo "$type $file\n";
 }
 echo "</pre>";
+
+if (is_dir(__DIR__ . '/connection')) {
+    echo "<h4>Directory Listing (connection/):</h4><pre>";
+    $conn_files = scandir(__DIR__ . '/connection');
+    foreach($conn_files as $file) {
+        if ($file === '.' || $file === '..') continue;
+        $type = is_dir(__DIR__ . '/connection/' . $file) ? '[DIR]' : '[FILE]';
+        echo "$type $file\n";
+    }
+    echo "</pre>";
+} else {
+    echo "<p style='color: orange;'>⚠️ connection/ is NOT a directory according to is_dir()</p>";
+}
 
 $connectionFile = __DIR__ . '/connection/database.php';
 

@@ -18,10 +18,6 @@
       "use": "vercel-php@0.7.3"
     },
     {
-      "src": "connection/*.php",
-      "use": "vercel-php@0.7.3"
-    },
-    {
       "src": "styles/**",
       "use": "@vercel/static"
     },
