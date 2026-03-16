@@ -41,7 +41,7 @@ $categories = fetchAllFromTable($conn, 'wst_PCategories', 'CategoryName');
 
 // Fetch logs with the dynamic status filter
 $logs = getWasteLogs($conn, $filters['status'], $filters);
-$pageTitle = 'Supervisor Dashboard - Waste Logs';
+$pageTitle = 'History Logs - Waste Logs';
 $extraCSS = ['supervisor.css'];
 require_once __DIR__ . '/../components/header.php';
 ?>

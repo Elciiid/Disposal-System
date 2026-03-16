@@ -49,8 +49,7 @@ try {
     require_once __DIR__ . '/../utils/functions.php';
     handleSystemError("Error fetching logs: " . $e->getMessage());
 }
-?>
-<?php
+
 $pageTitle = 'Supervisor Dashboard - Waste Logs';
 $extraCSS = ['supervisor.css'];
 require_once __DIR__ . '/../components/header.php';
