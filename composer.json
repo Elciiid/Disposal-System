@@ -1,6 +1,5 @@
 {
     "name": "elciiid/disposal-system",
-    "description": "Production Waste Disposal System",
     "require": {
         "php": ">=7.4"
     }
