@@ -44,6 +44,10 @@
       "dest": "/pages/$1.php"
     },
     {
+      "src": "/([^/]+\\.php)$",
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.php"
     }
