@@ -88,11 +88,11 @@ try {
         
         echo "<h3>Password Verification Check (User 3096):</h3>";
         if ($hash) {
-            $isValid = password_verify('password123', $hash);
+            $isValid = password_verify('password12', $hash);
             if ($isValid) {
-                echo "<p style='color: green;'>✅ Password 'password123' is VALID for user 3096.</p>";
+                echo "<p style='color: green;'>✅ Password 'password12' is VALID for user 3096.</p>";
             } else {
-                echo "<p style='color: red;'>❌ Password 'password123' is INVALID for user 3096.</p>";
+                echo "<p style='color: red;'>❌ Password 'password12' is INVALID for user 3096.</p>";
                 echo "<p>Stored Hash: <code>$hash</code></p>";
             }
         } else {

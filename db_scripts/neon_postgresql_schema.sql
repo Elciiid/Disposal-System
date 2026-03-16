@@ -160,13 +160,13 @@ SELECT r.RoleID, p.PermissionID FROM wst_Roles r, wst_Permissions p
 WHERE r.RoleName = 'Admin'
 AND NOT EXISTS (SELECT 1 FROM wst_RolePermissions WHERE RoleID = r.RoleID AND PermissionID = p.PermissionID);
 
--- 4. Mock Users (Password: password123)
+-- 4. Mock Users (Password: password12)
 INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) 
-SELECT '3096', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'System Administrator', 'EMP-001', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Admin'), NULL, NULL
+SELECT '3096', '$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgdt97bReypE.6u286pW.V2Y66jO', 'System Administrator', 'EMP-001', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Admin'), NULL, NULL
 WHERE NOT EXISTS (SELECT 1 FROM wst_Users WHERE Username = '3096');
 
 INSERT INTO wst_Users (Username, Password, FullName, EmployeeID, RoleID, PhaseID, AreaID) 
-SELECT '5678', '$2y$10$8Q6/K/4G1rFwz9y6Y1/2e.q8x5vYFzG.b/G.b/G.b/G.b/G.b/G.b/', 'Juan Dela Cruz', 'EMP-002', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Manager'), (SELECT PhaseID FROM wst_Phases WHERE PhaseName = 'Phase 1'), NULL
+SELECT '5678', '$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgdt97bReypE.6u286pW.V2Y66jO', 'Juan Dela Cruz', 'EMP-002', (SELECT RoleID FROM wst_Roles WHERE RoleName = 'Manager'), (SELECT PhaseID FROM wst_Phases WHERE PhaseName = 'Phase 1'), NULL
 WHERE NOT EXISTS (SELECT 1 FROM wst_Users WHERE Username = '5678');
 
 -- 5. Sample Log (Optional)
