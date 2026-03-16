@@ -1,17 +1,51 @@
 {
   "version": 2,
   "builds": [
-    { "src": "index.php", "use": "vercel-php@0.7.3" },
-    { "src": "test_connection.php", "use": "vercel-php@0.7.3" },
-    { "src": "pages/*.php", "use": "vercel-php@0.7.3" },
-    { "src": "api/*.php", "use": "vercel-php@0.7.3" },
-    { "src": "auth/*.php", "use": "vercel-php@0.7.3" }
+    {
+      "src": "*.php",
+      "use": "vercel-php@0.7.3"
+    },
+    {
+      "src": "pages/*.php",
+      "use": "vercel-php@0.7.3"
+    },
+    {
+      "src": "api/*.php",
+      "use": "vercel-php@0.7.3"
+    },
+    {
+      "src": "auth/*.php",
+      "use": "vercel-php@0.7.3"
+    },
+    {
+      "src": "styles/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
+    }
   ],
   "routes": [
-    { "src": "/(assets|styles)/(.*)", "dest": "/$1/$2" },
-    { "src": "/api/(.*)", "dest": "/api/$1.php" },
-    { "src": "/auth/(.*)", "dest": "/auth/$1.php" },
-    { "src": "/pages/(.*)", "dest": "/pages/$1.php" },
-    { "src": "/(.*)", "dest": "/index.php" }
+    {
+      "src": "/(assets|styles)/(.*)",
+      "dest": "/$1/$2"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.php"
+    },
+    {
+      "src": "/auth/(.*)",
+      "dest": "/auth/$1.php"
+    },
+    {
+      "src": "/pages/(.*)",
+      "dest": "/pages/$1.php"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.php"
+    }
   ]
 }

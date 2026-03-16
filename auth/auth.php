@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['username'])) {
 
 // 2. Auto-fill session details if coming from another app (like the lrnph portal)
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['employee_id']) || !isset($_SESSION['role'])) {
-    require_once __DIR__ . '/../connection/database.php';
+    require_once realpath(__DIR__ . '/../connection/database.php');
     try {
             $stmt = $conn->prepare("
                 SELECT u.UserID as user_id, u.Username as username, u.FullName as full_name, r.RoleName as role,
