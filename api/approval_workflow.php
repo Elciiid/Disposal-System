@@ -116,18 +116,20 @@ function getPendingRequests(PDO $conn, $userPhaseId, ?string $userRoleName = nul
                s.ShiftName,
                c.CategoryName,
                d.DescriptionName,
-               'Mock Submitter' AS SubmitterName,
-               '1234' AS SubmitterEmployeeID,
-               'Mock Approver' AS ApproverName,
-               '5678' AS ApproverEmployeeID,
-               '8888' AS ApproverBiometricsID
+               COALESCE(sub_u.FullName, w.SubmittedBy)          AS SubmitterName,
+               sub_u.EmployeeID                                  AS SubmitterEmployeeID,
+               COALESCE(apr_u.FullName, w.Step1ApprovedBy)      AS ApproverName,
+               apr_u.EmployeeID                                  AS ApproverEmployeeID,
+               apr_u.Username                                    AS ApproverBiometricsID
         FROM wst_Logs w
-        LEFT JOIN wst_Phases p        ON w.PhaseID       = p.PhaseID
-        LEFT JOIN wst_LogTypes t      ON w.TypeID        = t.TypeID
-        LEFT JOIN wst_Areas a         ON w.AreaID        = a.AreaID
-        LEFT JOIN wst_Shifts s        ON w.ShiftID       = s.ShiftID
-        LEFT JOIN wst_PCategories c   ON w.CategoryID    = c.CategoryID
-        LEFT JOIN wst_PDescriptions d  ON w.DescriptionID = d.DescriptionID
+        LEFT JOIN wst_Phases p        ON w.PhaseID        = p.PhaseID
+        LEFT JOIN wst_LogTypes t      ON w.TypeID         = t.TypeID
+        LEFT JOIN wst_Areas a         ON w.AreaID         = a.AreaID
+        LEFT JOIN wst_Shifts s        ON w.ShiftID        = s.ShiftID
+        LEFT JOIN wst_PCategories c   ON w.CategoryID     = c.CategoryID
+        LEFT JOIN wst_PDescriptions d ON w.DescriptionID  = d.DescriptionID
+        LEFT JOIN wst_Users sub_u     ON sub_u.Username   = w.SubmittedBy
+        LEFT JOIN wst_Users apr_u     ON apr_u.Username   = w.Step1ApprovedBy
         WHERE w.CurrentStep IN (" . implode(',', array_map('intval', $authorizedSteps)) . ")
           AND w.ApprovalStatus = 'Pending'
     ";
@@ -335,7 +337,7 @@ function processApprovalAction(PDO $conn, int $requestId, string $userId, $userP
     $sql = "
         UPDATE wst_Logs
         SET Step{$currentStep}ApprovedBy = :userId,
-            Step{$currentStep}ApprovedAt = GETDATE(),
+            Step{$currentStep}ApprovedAt = CURRENT_TIMESTAMP,
             CurrentStep    = :nextStep,
             ApprovalStatus = :newStatus
         WHERE LogID = :id
