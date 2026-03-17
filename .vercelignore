@@ -6,3 +6,7 @@ db_scripts/
 .idea/
 *.log
 node_modules/
+test_connection.php
+components/
+connection/
+utils/
