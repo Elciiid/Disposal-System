@@ -22,5 +22,7 @@
     <!-- Scripts -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Prefetch pages on hover to mask Vercel cold starts -->
+    <script src="https://instant.page/5.2.0" type="module"></script>
 </head>
 <body>
