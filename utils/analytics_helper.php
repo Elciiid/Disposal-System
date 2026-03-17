@@ -8,7 +8,7 @@
  * Get top 3 distribution of waste by category.
  */
 function getWasteDistributionByCategory($conn) {
-    $sql = "SELECT c.CategoryName, COUNT(w.LogID) as log_count, SUM(w.KG) as total_kg
+    $sql = "SELECT c.CategoryName as category_name, COUNT(w.LogID) as log_count, SUM(w.KG) as total_kg
             FROM wst_PCategories c
             LEFT JOIN wst_Logs w ON c.CategoryID = w.CategoryID
             GROUP BY c.CategoryName
@@ -205,43 +205,36 @@ function getWeeklyWasteTrends($conn) {
 
 /**
  * Get filtered counts and weights based on time scale (daily, weekly, monthly).
+ * All 4 metrics are fetched in a SINGLE SQL query to minimize Neon round-trips.
  */
 function getWasteStatsFiltered($conn, $timeScale = 'daily') {
     try {
         // Build the date condition based on time scale
         if ($timeScale === 'daily') {
-            $dateCondition = "LogDate::date = CURRENT_DATE";
+            $dateCondition = "w.LogDate::date = CURRENT_DATE";
         } elseif ($timeScale === 'weekly') {
-            // Monday of current week to today
-            $dateCondition = "LogDate::date >= date_trunc('week', CURRENT_DATE)::date AND LogDate::date <= CURRENT_DATE";
+            $dateCondition = "w.LogDate::date >= date_trunc('week', CURRENT_DATE)::date AND w.LogDate::date <= CURRENT_DATE";
         } else {
-            // Current month
-            $dateCondition = "EXTRACT(YEAR FROM LogDate) = EXTRACT(YEAR FROM CURRENT_DATE) AND EXTRACT(MONTH FROM LogDate) = EXTRACT(MONTH FROM CURRENT_DATE)";
+            $dateCondition = "EXTRACT(YEAR FROM w.LogDate) = EXTRACT(YEAR FROM CURRENT_DATE) AND EXTRACT(MONTH FROM w.LogDate) = EXTRACT(MONTH FROM CURRENT_DATE)";
         }
 
-        // Total filtered logs
-        $totalLogs = $conn->query("SELECT COUNT(*) FROM wst_Logs WHERE $dateCondition")->fetchColumn();
+        // Single query: all 4 metrics at once
+        $sql = "SELECT
+                    COUNT(w.LogID) as total_logs,
+                    COALESCE(SUM(w.KG), 0) as total_kg,
+                    COUNT(CASE WHEN t.TypeName ILIKE '%Other%' THEN 1 END) as others_count,
+                    COUNT(DISTINCT w.AreaID) as area_count
+                FROM wst_Logs w
+                LEFT JOIN wst_LogTypes t ON w.TypeID = t.TypeID
+                WHERE $dateCondition";
 
-        // Filtered weights
-        $stmt = $conn->query("SELECT SUM(KG) as total_kg FROM wst_Logs WHERE $dateCondition");
-        $weights = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Filtered "Others" count
-        $stmt = $conn->query("SELECT COUNT(w.LogID) 
-                              FROM wst_Logs w 
-                              JOIN wst_LogTypes t ON w.TypeID = t.TypeID 
-                              WHERE t.TypeName LIKE '%Other%' AND $dateCondition");
-        $othersCount = $stmt->fetchColumn();
-
-        // Filtered distinct area count
-        $stmt = $conn->query("SELECT COUNT(DISTINCT AreaID) FROM wst_Logs WHERE $dateCondition");
-        $areaCount = $stmt->fetchColumn();
+        $row = $conn->query($sql)->fetch(PDO::FETCH_ASSOC);
 
         return [
-            'total_logs'   => $totalLogs ?: 0,
-            'total_kg'     => $weights['total_kg'] ?: 0,
-            'others_count' => $othersCount ?: 0,
-            'area_count'   => $areaCount ?: 0
+            'total_logs'   => (int)($row['total_logs']   ?? 0),
+            'total_kg'     => (float)($row['total_kg']   ?? 0),
+            'others_count' => (int)($row['others_count'] ?? 0),
+            'area_count'   => (int)($row['area_count']   ?? 0)
         ];
     } catch (PDOException $e) {
         return [
@@ -255,160 +248,149 @@ function getWasteStatsFiltered($conn, $timeScale = 'daily') {
 
 /**
  * Get general counts and weights.
+ * Consolidated into 2 queries (all-time stats + today's log count) instead of 5.
  */
 function getWasteStats($conn) {
     try {
-        // Total logs
-        $totalLogsResult = $conn->query("SELECT COUNT(*) FROM wst_Logs")->fetchColumn();
-        
-        // Logs today
-        $todayLogsResult = $conn->query("SELECT COUNT(*) FROM wst_Logs WHERE LogDate::date = CURRENT_DATE")->fetchColumn();
-        
-        // Weights
-        $stmt = $conn->query("SELECT SUM(KG) as total_kg FROM wst_Logs");
-        $weights = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Log types distribution (Waste vs Transfer)
-        $stmt = $conn->query("SELECT t.TypeName, COUNT(w.LogID) as count 
-                              FROM wst_LogTypes t 
-                              LEFT JOIN wst_Logs w ON t.TypeID = w.TypeID 
-                              GROUP BY t.TypeName");
-        $types = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        // Query 1: All-time aggregated stats in one shot
+        $sql = "SELECT
+                    COUNT(w.LogID) as total_logs,
+                    COALESCE(SUM(w.KG), 0) as total_kg,
+                    COUNT(CASE WHEN t.TypeName ILIKE '%Other%' THEN 1 END) as others_count,
+                    COUNT(DISTINCT w.AreaID) as area_count
+                FROM wst_Logs w
+                LEFT JOIN wst_LogTypes t ON w.TypeID = t.TypeID";
+        $row = $conn->query($sql)->fetch(PDO::FETCH_ASSOC);
 
-        // Shorthand counts
-        $othersCount = 0;
-        foreach ($types as $name => $count) {
-            if (stripos($name, 'Other') !== false) {
-                $othersCount += $count;
-            }
-        }
-
-        // Distinct area count
-        $areaCount = $conn->query("SELECT COUNT(DISTINCT AreaID) FROM wst_Logs")->fetchColumn() ?: 0;
+        // Query 2: Today's count (requires separate WHERE)
+        $todayLogsResult = $conn->query(
+            "SELECT COUNT(*) FROM wst_Logs WHERE LogDate::date = CURRENT_DATE"
+        )->fetchColumn();
 
         return [
-            'total_logs'   => $totalLogsResult ?: 0,
-            'today_logs'   => $todayLogsResult ?: 0,
-            'total_kg'     => $weights['total_kg'] ?: 0,
-            'others_count' => $othersCount,
-            'area_count'   => $areaCount
+            'total_logs'   => (int)($row['total_logs']   ?? 0),
+            'today_logs'   => (int)($todayLogsResult     ?? 0),
+            'total_kg'     => (float)($row['total_kg']   ?? 0),
+            'others_count' => (int)($row['others_count'] ?? 0),
+            'area_count'   => (int)($row['area_count']   ?? 0)
         ];
     } catch (PDOException $e) {
         return [
-            'total_logs' => 0,
-            'today_logs' => 0,
-            'total_kg' => 0,
-            'total_pcs' => 0,
-            'types' => []
+            'total_logs'   => 0,
+            'today_logs'   => 0,
+            'total_kg'     => 0,
+            'others_count' => 0,
+            'area_count'   => 0
         ];
     }
 }
 
 /**
  * Get metrics for the TV Dashboard based on Phase and Categories.
- * Provides weight and trend (up, down, stable) for "Disposal" and "Excess Dough".
+ * Uses a single batched SQL query to fetch today + yesterday weights
+ * instead of N+1 nested loops — drastically reduces Neon round-trips.
  */
 function getTVBoardMetrics($conn, $phaseId) {
     try {
-        $results = [];
-
-        // 1. Find all categories that have logs TODAY for this phase
-        $sqlTodayCats = "SELECT DISTINCT w.CategoryID, c.CategoryName 
-                         FROM wst_Logs w
-                         JOIN wst_PCategories c ON w.CategoryID = c.CategoryID
-                         WHERE w.PhaseID = :phaseId
-                         AND w.LogDate::date = CURRENT_DATE";
-        $stmtCats = $conn->prepare($sqlTodayCats);
-        $stmtCats->execute([':phaseId' => $phaseId]);
-        $activeCats = $stmtCats->fetchAll(PDO::FETCH_ASSOC);
-
-        if (empty($activeCats)) {
-            return []; // Nothing logged today in this phase
+        // Step 1: Define label→patterns map for this phase
+        if ($phaseId == 1) {
+            $targetTypes = [
+                'Disposed Waste' => ['%Dispos%'],
+                'Crumble'        => ['%Crumble%']
+            ];
+        } elseif ($phaseId == 2) {
+            $targetTypes = [
+                'Disposed Waste' => ['%Dispos%'],
+                'Excess Dough'   => ['%Excess%']
+            ];
+        } elseif ($phaseId == 3) {
+            $targetTypes = [
+                'Shell'      => ['%Shell%'],
+                'Base / Tart'=> ['%Base%', '%Tart%'],
+                'Puff'       => ['%Puff%'],
+                'Assembled'  => ['%Assembl%']
+            ];
+        } else {
+            $targetTypes = [
+                'Disposed Waste' => ['%Dispos%']
+            ];
         }
 
-        foreach ($activeCats as $cat) {
-            $catId = $cat['CategoryID'];
-            $catName = $cat['CategoryName'];
+        // Step 2: Build a single query that fetches today + yesterday,
+        //         all categories, all type patterns in ONE round-trip
+        $sql = "SELECT
+                    c.CategoryName,
+                    t.TypeName,
+                    SUM(CASE WHEN w.LogDate::date = CURRENT_DATE          THEN w.KG ELSE 0 END) as today_kg,
+                    SUM(CASE WHEN w.LogDate::date = CURRENT_DATE - INTERVAL '1 day' THEN w.KG ELSE 0 END) as yesterday_kg
+                FROM wst_Logs w
+                JOIN wst_PCategories c ON w.CategoryID = c.CategoryID
+                JOIN wst_LogTypes    t ON w.TypeID     = t.TypeID
+                WHERE w.PhaseID = :phaseId
+                  AND w.LogDate::date >= CURRENT_DATE - INTERVAL '1 day'
+                GROUP BY c.CategoryName, t.TypeName
+                HAVING SUM(CASE WHEN w.LogDate::date = CURRENT_DATE THEN w.KG ELSE 0 END) > 0
+                    OR SUM(CASE WHEN w.LogDate::date = CURRENT_DATE - INTERVAL '1 day' THEN w.KG ELSE 0 END) > 0";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':phaseId' => $phaseId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows)) {
+            return [];
+        }
+
+        // Step 3: Index results by CategoryName + TypeName for fast lookup
+        // Structure: $index[catName][typeName] = [today_kg, yesterday_kg]
+        $index = [];
+        foreach ($rows as $row) {
+            $index[$row['CategoryName']][$row['TypeName']] = [
+                'today_kg'     => (float)$row['today_kg'],
+                'yesterday_kg' => (float)$row['yesterday_kg']
+            ];
+        }
+
+        // Step 4: Build the $results array using the pattern map
+        $results = [];
+        foreach ($index as $catName => $typeMap) {
             $categoryData = ['metrics' => []];
 
-            if ($phaseId == 1) {
-                $targetTypes = [
-                    'Disposed Waste' => ['%Dispos%'],
-                    'Crumble' => ['%Crumble%']
-                ];
-            } elseif ($phaseId == 2) {
-                $targetTypes = [
-                    'Disposed Waste' => ['%Dispos%'],
-                    'Excess Dough' => ['%Excess%']
-                ];
-            } elseif ($phaseId == 3) {
-                $targetTypes = [
-                    'Shell' => ['%Shell%'],
-                    'Base / Tart' => ['%Base%', '%Tart%'],
-                    'Puff' => ['%Puff%'],
-                    'Assembled' => ['%Assembl%']
-                ];
-            } else {
-                $targetTypes = [
-                    'Disposed Waste' => ['%Dispos%']
-                ];
-            }
-
             foreach ($targetTypes as $label => $patterns) {
-                $todayVal = 0;
+                $todayVal     = 0;
                 $yesterdayVal = 0;
 
-                foreach ($patterns as $typePattern) {
-                    $sqlToday = "SELECT SUM(w.KG) as total 
-                                 FROM wst_Logs w
-                                 JOIN wst_LogTypes t ON w.TypeID = t.TypeID
-                                 WHERE w.CategoryID = :catId 
-                                 AND w.PhaseID = :phaseId
-                                 AND t.TypeName LIKE :typePattern
-                                 AND w.LogDate::date = CURRENT_DATE";
-                    
-                    $stmt = $conn->prepare($sqlToday);
-                    $stmt->execute([
-                        ':catId' => $catId,
-                        ':phaseId' => $phaseId,
-                        ':typePattern' => $typePattern
-                    ]);
-                    $todayVal += (float)$stmt->fetchColumn() ?: 0;
-                    
-                    $sqlYesterday = "SELECT SUM(w.KG) as total 
-                                     FROM wst_Logs w
-                                     JOIN wst_LogTypes t ON w.TypeID = t.TypeID
-                                     WHERE w.CategoryID = :catId 
-                                     AND w.PhaseID = :phaseId
-                                     AND t.TypeName LIKE :typePattern
-                                     AND w.LogDate::date = CURRENT_DATE - INTERVAL '1 day'";
-                    
-                    $stmt = $conn->prepare($sqlYesterday);
-                    $stmt->execute([
-                        ':catId' => $catId,
-                        ':phaseId' => $phaseId,
-                        ':typePattern' => $typePattern
-                    ]);
-                    $yesterdayVal += (float)$stmt->fetchColumn() ?: 0;
+                // Match DB rows where TypeName matches any pattern for this label
+                foreach ($typeMap as $typeName => $vals) {
+                    foreach ($patterns as $p) {
+                        // Convert SQL LIKE pattern to a simple PHP str_contains check
+                        $needle = trim($p, '%');
+                        if (stripos($typeName, $needle) !== false) {
+                            $todayVal     += $vals['today_kg'];
+                            $yesterdayVal += $vals['yesterday_kg'];
+                            break; // avoid double-counting if multiple patterns match
+                        }
+                    }
                 }
-                
-                $trend = 'stable';
-                if ($todayVal > $yesterdayVal) {
-                    $trend = 'up';
-                } elseif ($todayVal < $yesterdayVal && $yesterdayVal > 0) {
-                    $trend = 'down';
+
+                // Only include the metric if there was activity today
+                if ($todayVal > 0 || $yesterdayVal > 0) {
+                    $trend = 'stable';
+                    if ($todayVal > $yesterdayVal) {
+                        $trend = 'up';
+                    } elseif ($todayVal < $yesterdayVal && $yesterdayVal > 0) {
+                        $trend = 'down';
+                    }
+
+                    $categoryData['metrics'][] = [
+                        'label' => strtoupper($label),
+                        'data'  => ['val' => $todayVal, 'trend' => $trend]
+                    ];
                 }
-                
-                $categoryData['metrics'][] = [
-                    'label' => strtoupper($label),
-                    'data' => [
-                        'val' => $todayVal,
-                        'trend' => $trend
-                    ]
-                ];
             }
-            
-            $results[$catName] = $categoryData;
+
+            if (!empty($categoryData['metrics'])) {
+                $results[$catName] = $categoryData;
+            }
         }
 
         return $results;

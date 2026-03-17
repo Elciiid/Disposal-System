@@ -118,7 +118,7 @@ require_once __DIR__ . '/../components/header.php';
                     ?>
                     <div class="d-flex justify-content-between align-items-end mb-1">
                         <span class="fw-bold" style="font-size: 1.5rem; line-height: 1;"><?= $percentage ?><span class="fs-6 text-muted fw-normal ms-1">%</span></span>
-                        <span class="text-muted fw-bold d-flex align-items-center gap-2" style="font-size: 0.75rem; letter-spacing: 0.05em;"><?= strtoupper($item['CategoryName']) ?> <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:<?= $color ?>;"></span></span>
+                        <span class="text-muted fw-bold d-flex align-items-center gap-2" style="font-size: 0.75rem; letter-spacing: 0.05em;"><?= strtoupper($item['category_name'] ?? '') ?> <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:<?= $color ?>;"></span></span>
                     </div>
                     <div class="progress mb-4" style="height: 8px; border-radius: 10px; background-color: #f1f3f7;">
                         <div class="progress-bar" role="progressbar" style="width: <?= $percentage ?>%; background-color: <?= $color ?>; border-radius: 10px;"></div>
